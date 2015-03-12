@@ -32,6 +32,9 @@
 
 int yyparse(Rationnel **rationnel, yyscan_t scanner);
 
+bool parcours_mot_vide(Rationnel *rat);
+bool estFeuille(Rationnel *rat);
+
 Rationnel *rationnel(Noeud etiquette, char lettre, int position_min, int position_max, void *data, Rationnel *gauche, Rationnel *droit, Rationnel *pere)
 {
    Rationnel *rat;
@@ -286,7 +289,25 @@ void numeroter_rationnel(Rationnel *rat)
 
 bool contient_mot_vide(Rationnel *rat)
 {
-   A_FAIRE_RETURN(true);
+  return parcours_mot_vide(rat);
+}
+
+bool parcours_mot_vide(Rationnel *rat)
+{
+  if ( estFeuille(rat) ){
+    if (rat -> etiquette == EPSILON)
+      return true;
+  }
+  if (rat -> gauche != NULL)
+    return parcours_mot_vide(rat -> gauche);
+  if (rat -> droit != NULL)
+    return parcours_mot_vide(rat -> droit);
+  return false;
+  
+}
+
+bool estFeuille(Rationnel *rat){
+  return rat->gauche == NULL && rat -> droit == NULL;
 }
 
 Ensemble *premier(Rationnel *rat)
