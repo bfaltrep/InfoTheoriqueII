@@ -32,8 +32,10 @@
 
 int yyparse(Rationnel **rationnel, yyscan_t scanner);
 
-bool parcours_mot_vide(Rationnel *rat);
-bool estFeuille(Rationnel *rat);
+
+int parcours_numeroter_rationnel(Rationnel *rat, int nb);
+int est_feuille(Rationnel *rat);
+
 
 Rationnel *rationnel(Noeud etiquette, char lettre, int position_min, int position_max, void *data, Rationnel *gauche, Rationnel *droit, Rationnel *pere)
 {
@@ -282,38 +284,56 @@ int rationnel_to_dot_aux(Rationnel *rat, FILE *output, int pere, int noeud_coura
    return noeud_courant;
 }
 
+
+/*    FAIT PAR NOUS ! SI ERREURS, VIENT DE CE QUI EST DESSOUS    */
+
+
 void numeroter_rationnel(Rationnel *rat)
 {
-   A_FAIRE;
+  parcours_numeroter_rationnel(rat, 0);
 }
 
+int parcours_numeroter_rationnel(Rationnel *rat, int nb){
+  
+  if(est_feuille(rat)){
+    rat->position_min = nb;
+    rat->position_max = nb;
+    return nb++;
+  }
+  
+  //dans les noeuds internes, il y a forcément un fils gauche.
+  rat->position_min = nb++;
+  int tmp = parcours_numeroter_rationnel(rat->gauche, nb);
+
+  //union/concat ont un fils droit, pas star
+  if(rat->droit != NULL){
+    rat->position_max = parcours_numeroter_rationnel(rat->droit, tmp);
+  }
+  else{
+    rat->position_max = tmp;
+  }
+  return rat->position_max;
+}
+
+
+/*indique si le rationnel passé en paramètre est une feuille de l'arbre.*/
+int est_feuille(Rationnel *rat){
+  return rat->etiquette == EPSILON || rat->etiquette == LETTRE;
+}
+
+
+/*nathan*/
 bool contient_mot_vide(Rationnel *rat)
 {
-  return parcours_mot_vide(rat);
-}
-
-bool parcours_mot_vide(Rationnel *rat)
-{
-  if ( estFeuille(rat) ){
-    if (rat -> etiquette == EPSILON)
-      return true;
-  }
-  if (rat -> gauche != NULL)
-    return parcours_mot_vide(rat -> gauche);
-  if (rat -> droit != NULL)
-    return parcours_mot_vide(rat -> droit);
-  return false;
-  
-}
-
-bool estFeuille(Rationnel *rat){
-  return rat->gauche == NULL && rat -> droit == NULL;
+   A_FAIRE_RETURN(true);
 }
 
 Ensemble *premier(Rationnel *rat)
 {
    A_FAIRE_RETURN(NULL);
 }
+
+
 
 Ensemble *dernier(Rationnel *rat)
 {
