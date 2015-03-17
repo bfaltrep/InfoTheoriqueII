@@ -325,7 +325,19 @@ int est_feuille(Rationnel *rat){
 /*nathan*/
 bool contient_mot_vide(Rationnel *rat)
 {
-   A_FAIRE_RETURN(true);
+  if (est_feuille (rat)){
+    return get_etiquette(rat) == EPSILON;
+  }
+  
+  if(rat->droit != NULL){
+    if (contient_mot_vide(rat->droit) == true)
+      return true;
+  }
+  if (rat -> gauche != NULL){
+    if (contient_mot_vide(rat->gauche) == true)
+      return true;
+  }
+  return false;
 }
 
 Ensemble *premier(Rationnel *rat)
