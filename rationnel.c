@@ -322,21 +322,29 @@ int est_feuille(Rationnel *rat){
 }
 
 
-/*nathan*/
+/*
+**
+** @date 
+** @details recherche d'un mot vide dans un rationnel
+*/
 bool contient_mot_vide(Rationnel *rat)
 {
+  //test si cela est une feuille
   if (est_feuille (rat)){
     return get_etiquette(rat) == EPSILON;
   }
-  
+  //test si le fils droit est EPSILON si son fils droite le contient alors je retourne true
   if(rat->droit != NULL){
     if (contient_mot_vide(rat->droit) == true)
       return true;
   }
-  if (rat -> gauche != NULL){
+  //test si le fils gauche est EPSILON si son fils gauche le contient alors je retourne true
+    if (rat -> gauche != NULL){
     if (contient_mot_vide(rat->gauche) == true)
       return true;
   }
+
+    //sinon je return le false final...
   return false;
 }
 
