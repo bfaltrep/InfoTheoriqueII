@@ -287,7 +287,7 @@ int rationnel_to_dot_aux(Rationnel *rat, FILE *output, int pere, int noeud_coura
 */
 void numeroter_rationnel(Rationnel *rat)
 {
-  parcours_numeroter_rationnel(rat, 0);
+  parcours_numeroter_rationnel(rat, 1);
 }
 
 /*
@@ -298,16 +298,16 @@ int parcours_numeroter_rationnel(Rationnel *rat, int nb){
   if(est_feuille(rat)){
     rat->position_min = nb;
     rat->position_max = nb;
-    return nb++;
+    return nb;
   }
-  
+
+  rat->position_min = nb;
   //dans les noeuds internes, il y a forcément un fils gauche.
-  rat->position_min = nb++;
   int tmp = parcours_numeroter_rationnel(rat->gauche, nb);
 
   //union/concat ont un fils droit, pas star
   if(rat->droit != NULL){
-    rat->position_max = parcours_numeroter_rationnel(rat->droit, tmp);
+    rat->position_max = parcours_numeroter_rationnel(rat->droit, tmp+1);
   }
   else{
     rat->position_max = tmp;
@@ -321,13 +321,28 @@ int est_feuille(Rationnel *rat){
   return rat->etiquette == EPSILON || rat->etiquette == LETTRE;
 }
 
+bool contient_mot_vide(Rationnel *rat){
+  if (est_feuille (rat)){
+    return get_etiquette(rat) == EPSILON;
+  }
+  if(rat->etiquette == STAR){
+    return true;
+  }
+  if(rat->droit != NULL && contient_mot_vide(rat->droit) == true){
+    return true;
+  }
+  if (rat->gauche != NULL && contient_mot_vide(rat->gauche) == true){
+    return true;
+  }
+  return false;
+}
 
 /*
 **
 ** @date 
 ** @details recherche d'un mot vide dans un rationnel
 */
-bool contient_mot_vide(Rationnel *rat)
+bool contient_mot_vide2(Rationnel *rat)
 {
   //test si cela est une feuille
   if (est_feuille (rat)){
@@ -346,12 +361,6 @@ bool contient_mot_vide(Rationnel *rat)
 
     //sinon je return le false final...
   return false;
-}
-
-/* !!! conservé non modifié. Si premier() fonctionne : a supprimer*/
-Ensemble *premier_bis(Rationnel *rat)
-{
-   A_FAIRE_RETURN(NULL);
 }
 
 void parcours_premier(Rationnel *rat, Ensemble * premier){
@@ -382,7 +391,7 @@ void parcours_premier(Rationnel *rat, Ensemble * premier){
       //si fils gauche contient ε on autorise le fils droit
     case CONCAT:
       parcours_premier(fils_gauche(rat), premier);
-      if( contient_mot_vide(fils_gauche(rat))){
+      if(contient_mot_vide(fils_gauche(rat))){
 	parcours_premier(fils_droit(rat), premier);
       }
       break;
@@ -390,7 +399,6 @@ void parcours_premier(Rationnel *rat, Ensemble * premier){
       //dans le cas de l'étoile, on prend le fils mais aussi ce qui vient directement après dans l'expression.
     case STAR:
       parcours_premier(fils(rat), premier);
-      parcours_premier(fils_droit(pere(rat)), premier);
       break;
 
     default:
