@@ -107,32 +107,27 @@ Noeud get_etiquette(Rationnel* rat)
 
 char get_lettre(Rationnel* rat)
 {
-   assert (get_etiquette(rat) == LETTRE);
    return rat->lettre;
 }
 
 int get_position_min(Rationnel* rat)
 {
-   assert (get_etiquette(rat) == LETTRE);
    return rat->position_min;
 }
 
 int get_position_max(Rationnel* rat)
 {
-   assert (get_etiquette(rat) == LETTRE);
    return rat->position_max;
 }
 
 void set_position_min(Rationnel* rat, int valeur)
 {
-   assert (get_etiquette(rat) == LETTRE);
    rat->position_min = valeur;
    return;
 }
 
 void set_position_max(Rationnel* rat, int valeur)
 {
-   assert (get_etiquette(rat) == LETTRE);
    rat->position_max = valeur;
    return;
 }
@@ -287,12 +282,17 @@ int rationnel_to_dot_aux(Rationnel *rat, FILE *output, int pere, int noeud_coura
 
 /*    FAIT PAR NOUS ! SI ERREURS, VIENT DE CE QUI EST DESSOUS    */
 
-
+/*
+  ajoute la numérotation des éléments de la fonction rationnelle.
+*/
 void numeroter_rationnel(Rationnel *rat)
 {
   parcours_numeroter_rationnel(rat, 0);
 }
 
+/*
+  parcours de l'arbre affectant les valeurs à position_min et position_max aux noeuds.
+*/
 int parcours_numeroter_rationnel(Rationnel *rat, int nb){
   
   if(est_feuille(rat)){
@@ -328,43 +328,94 @@ bool contient_mot_vide(Rationnel *rat)
    A_FAIRE_RETURN(true);
 }
 
-Ensemble *premier(Rationnel *rat)
+/* !!! conservé non modifié. Si premier() fonctionne : a supprimer*/
+Ensemble *premier_bis(Rationnel *rat)
 {
    A_FAIRE_RETURN(NULL);
 }
 
+void parcours_premier(Rationnel *rat, Ensemble * premier){
+  //arrêter le parcours ? 
+  if (rat == NULL)
+    {
+      printf("∅");
+      return;
+    }
+   
+  switch(get_etiquette(rat))
+    {
+    case EPSILON:
+      ajouter_element(premier,atoi("ε"));
+      break;
+         
+    case LETTRE:
+      ajouter_element(premier,get_lettre(rat));
+      break;
 
+      //lors de l'union, on intègre les deux fils aux premiers.
+    case UNION:
+      parcours_premier(fils_gauche(rat), premier);
+      parcours_premier(fils_droit(rat), premier);
+      break;
+
+      //lors d'une concaténation, on ne prend que le fils gauche.
+      //si fils gauche contient ε on autorise le fils droit
+    case CONCAT:
+      parcours_premier(fils_gauche(rat), premier);
+      if( contient_mot_vide(fils_gauche(rat))){
+	parcours_premier(fils_droit(rat), premier);
+      }
+      break;
+
+      //dans le cas de l'étoile, on prend le fils mais aussi ce qui vient directement après dans l'expression.
+    case STAR:
+      parcours_premier(fils(rat), premier);
+      parcours_premier(fils_droit(pere(rat)), premier);
+      break;
+
+    default:
+      assert(false);
+      break;
+    }
+}
+
+Ensemble *premier(Rationnel *rat)
+{
+  Ensemble * e = creer_ensemble(NULL,NULL,NULL);
+  parcours_premier(rat,e);
+  return e;
+}
 
 Ensemble *dernier(Rationnel *rat)
 {
-   A_FAIRE_RETURN(NULL);
+  A_FAIRE_RETURN(NULL);
 }
 
 Ensemble *suivant(Rationnel *rat, int position)
 {
-   A_FAIRE_RETURN(NULL);
+  A_FAIRE_RETURN(NULL);
 }
 
 Automate *Glushkov(Rationnel *rat)
 {
-   A_FAIRE_RETURN(NULL);
+  A_FAIRE_RETURN(NULL);
 }
 
 bool meme_langage (const char *expr1, const char* expr2)
 {
-   A_FAIRE_RETURN(true);
+  A_FAIRE_RETURN(true);
 }
 
 Systeme systeme(Automate *automate)
 {
-   A_FAIRE_RETURN(NULL);
+  A_FAIRE_RETURN(NULL);
 }
 
 void print_ligne(Rationnel **ligne, int n)
 {
-   for (int j = 0; j <=n; j++)
-      {
-         print_rationnel(ligne[j]);
+  for (int j = 0; j <=n; j++)
+    {
+      print_rationnel(ligne[j]);
          if (j<n)
             printf("X%d\t+\t", j);
       }

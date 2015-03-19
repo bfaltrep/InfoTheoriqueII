@@ -641,18 +641,30 @@ Automate *automate_accessible( const Automate * automate ){
 
 //modifications
 
+/*
+  Ajoute une transition à l'automate transmis dans data. 
+  Cette transition est inversée vis-à-vis des informations passées en paramètre. 
+  La lettre reste inchangée.
+*/
 void inverser_origine_destination(int origine, char lettre, int fin, void* data ){
   ajouter_transition( ((Automate *) data),fin,lettre,origine);
 }
 
+/*
+  Ajoute un état initial à l'automate transmis dans data.
+  l'état ajouté correspond à élément.
+*/
 void copier_etat_initial(const intptr_t element, void * data){
   ajouter_etat_initial( ((Automate *) data), element);
 }
 
+/*
+  Ajoute un état final à l'automate transmis dans data.
+  l'état ajouté correspond à élément.
+*/
 void copier_etat_final(const intptr_t element, void * data){
   ajouter_etat_final( ((Automate *) data), element);
 }
-
 
 /*
   retourne l'automate miroir déterminisé.
