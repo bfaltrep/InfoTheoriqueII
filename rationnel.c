@@ -134,13 +134,14 @@ void set_position_max(Rationnel* rat, int valeur)
 
 Rationnel *fils_gauche(Rationnel* rat)
 {
-   assert((get_etiquette(rat) == CONCAT) || (get_etiquette(rat) == UNION));
+  //pourquoi cette assertion ? 
+  //assert((get_etiquette(rat) == CONCAT) || (get_etiquette(rat) == UNION));
    return rat->gauche;
 }
 
 Rationnel *fils_droit(Rationnel* rat)
 {
-   assert((get_etiquette(rat) == CONCAT) || (get_etiquette(rat) == UNION));
+  //assert((get_etiquette(rat) == CONCAT) || (get_etiquette(rat) == UNION));
    return rat->droit;
 }
 
@@ -295,7 +296,7 @@ void numeroter_rationnel(Rationnel *rat)
 */
 int parcours_numeroter_rationnel(Rationnel *rat, int nb){
   
-  if(est_feuille(rat)){
+  if(rat->etiquette == LETTRE){
     rat->position_min = nb;
     rat->position_max = nb;
     return nb;
@@ -321,82 +322,67 @@ int est_feuille(Rationnel *rat){
   return rat->etiquette == EPSILON || rat->etiquette == LETTRE;
 }
 
-bool contient_mot_vide(Rationnel *rat){
-  if (est_feuille (rat)){
-    return get_etiquette(rat) == EPSILON;
-  }
-  if(rat->etiquette == STAR){
-    return true;
-  }
-  if(rat->droit != NULL && contient_mot_vide(rat->droit) == true){
-    return true;
-  }
-  if (rat->gauche != NULL && contient_mot_vide(rat->gauche) == true){
-    return true;
-  }
-  return false;
-}
-
 /*
 **
 ** @date 
 ** @details recherche d'un mot vide dans un rationnel
 */
-bool contient_mot_vide2(Rationnel *rat)
+bool contient_mot_vide(Rationnel *rat)
 {
-  //test si cela est une feuille
-  if (est_feuille (rat)){
-    return get_etiquette(rat) == EPSILON || get_etiquette(rat) == STAR;
-  }
-  //test si le fils droit est EPSILON si son fils droite le contient alors je retourne true
-  if(rat->droit != NULL){
-    if (contient_mot_vide(rat->droit) == true)
-      return true;
-  }
-  //test si le fils gauche est EPSILON si son fils gauche le contient alors je retourne true
-    if (rat -> gauche != NULL){
-    if (contient_mot_vide(rat->gauche) == true)
-      return true;
-  }
+  switch(get_etiquette(rat))
+    {
+    case EPSILON:
 
-    //sinon je return le false final...
-  return false;
+    case STAR:
+      return true;
+
+    case UNION:
+      return contient_mot_vide(fils_gauche(rat)) || contient_mot_vide(fils_droit(rat));
+      
+    case CONCAT:
+      return contient_mot_vide(fils_gauche(rat)) && contient_mot_vide(fils_droit(rat));
+      
+    case LETTRE:
+      return false;
+
+    default:
+      assert(false);
+      break;
+    }
+    
 }
 
 void parcours_premier(Rationnel *rat, Ensemble * premier){
-  //arrêter le parcours ? 
+  //arrêter le parcours
   if (rat == NULL)
     {
-      printf("∅");
       return;
     }
    
   switch(get_etiquette(rat))
     {
+      //on ne numerote ni ne considère les epsilons afin d'obtenir un graphe sans transitions epsilons
     case EPSILON:
-      ajouter_element(premier,atoi("ε"));
       break;
-         
     case LETTRE:
-      ajouter_element(premier,get_lettre(rat));
+      //get_position_min(rat) == get_position_max(rat), on prend indifferemment la valeur
+      ajouter_element(premier,get_position_min(rat));
       break;
 
-      //lors de l'union, on intègre les deux fils aux premiers.
     case UNION:
       parcours_premier(fils_gauche(rat), premier);
       parcours_premier(fils_droit(rat), premier);
       break;
 
-      //lors d'une concaténation, on ne prend que le fils gauche.
-      //si fils gauche contient ε on autorise le fils droit
+
     case CONCAT:
       parcours_premier(fils_gauche(rat), premier);
+      //si fils gauche remplacable par ε on peut intégrer des éléments du fils droit à premier
       if(contient_mot_vide(fils_gauche(rat))){
 	parcours_premier(fils_droit(rat), premier);
       }
       break;
 
-      //dans le cas de l'étoile, on prend le fils mais aussi ce qui vient directement après dans l'expression.
     case STAR:
       parcours_premier(fils(rat), premier);
       break;
@@ -414,9 +400,54 @@ Ensemble *premier(Rationnel *rat)
   return e;
 }
 
+void parcours_dernier(Rationnel *rat, Ensemble * dernier){
+  //arrêter le parcours
+  if (rat == NULL)
+    {
+      printf("∅");
+      return;
+    }
+   
+  switch(get_etiquette(rat))
+    {
+    case EPSILON:
+      break;
+    case LETTRE:
+      //get_position_min(rat) == get_position_max(rat), on prend indifferemment la valeur
+      ajouter_element(dernier,get_position_min(rat));
+      break;
+
+      //lors de l'union, on intègre les deux fils aux premiers.
+    case UNION:
+      parcours_dernier(fils_droit(rat), dernier);
+      parcours_dernier(fils_gauche(rat), dernier);
+      break;
+
+      //lors d'une concaténation, on ne prend que le fils droit.
+      //si fils droit contient ε on autorise le fils gauche
+    case CONCAT:
+      parcours_dernier(fils_droit(rat), dernier);
+      if(contient_mot_vide(fils_droit(rat))){
+	parcours_dernier(fils_gauche(rat), dernier);
+      }
+      break;
+
+      //dans le cas de l'étoile, on prend le fils car remplacable par ε 
+    case STAR:
+      parcours_dernier(fils(rat), dernier);
+      break;
+
+    default:
+      assert(false);
+      break;
+    }
+}
+ 
 Ensemble *dernier(Rationnel *rat)
 {
-  A_FAIRE_RETURN(NULL);
+  Ensemble * e = creer_ensemble(NULL,NULL,NULL);
+  parcours_dernier(rat,e);
+  return e;
 }
 
 Ensemble *suivant(Rationnel *rat, int position)
@@ -444,19 +475,19 @@ void print_ligne(Rationnel **ligne, int n)
   for (int j = 0; j <=n; j++)
     {
       print_rationnel(ligne[j]);
-         if (j<n)
-            printf("X%d\t+\t", j);
-      }
-   printf("\n");
+      if (j<n)
+	printf("X%d\t+\t", j);
+    }
+  printf("\n");
 }
 
 void print_systeme(Systeme systeme, int n)
 {
-   for (int i = 0; i <= n-1; i++)
-   {
+  for (int i = 0; i <= n-1; i++)
+    {
       printf("X%d\t= ", i);
       print_ligne(systeme[i], n);
-   }
+    }
 }
 
 Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int n)
