@@ -670,6 +670,8 @@ void copier_etat_final(const intptr_t element, void * data){
   retourne l'automate miroir déterminisé.
 */
 Automate *miroir( const Automate * automate){
+  assert(automate);
+  
   Automate * a = creer_automate();
   pour_toute_transition( automate, inverser_origine_destination, ((Automate *) a));
   //inverse initiaux et finaux.
@@ -862,10 +864,14 @@ Automate * creer_automate_deterministe( const Automate* automate ){
 }
 
 Automate * creer_automate_minimal( const Automate* automate ){
+  assert(automate);
+  
   //on calcul le miroir de l'automate passé en paramètre et on le déterminise
   Automate * aMiroir = miroir(automate);
   //on calcul le miroir de aMiroir et on le déterminise
-  //on retourne alors un automate minimal
-  return miroir(aMiroir);
+  Automate * aMM = miroir(aMiroir);
+  liberer_automate(aMiroir);
+  //on retourne alors un automate minimal 
+  return aMM;
 }
 
