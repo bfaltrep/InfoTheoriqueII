@@ -331,7 +331,7 @@ bool contient_mot_vide(Rationnel *rat)
 {
   //test si cela est une feuille
   if (est_feuille (rat)){
-    return get_etiquette(rat) == EPSILON;
+    return get_etiquette(rat) == EPSILON || get_etiquette(rat) == STAR;
   }
   //test si le fils droit est EPSILON si son fils droite le contient alors je retourne true
   if(rat->droit != NULL){
