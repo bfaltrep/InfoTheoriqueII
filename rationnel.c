@@ -1,4 +1,4 @@
-/*
+stat/*
  *   Ce fichier fait partie d'un projet de programmation donné en Licence 3 
  *   à l'Université de Bordeaux.
  *
@@ -352,8 +352,11 @@ bool contient_mot_vide(Rationnel *rat)
     
 }
 
+/*
+  parcours de l'arbre préfixe ajoutant a l'ensemble premier les numeros des lettres de l'ensemble
+*/
 void parcours_premier(Rationnel *rat, Ensemble * premier){
-  //arrêter le parcours
+  //arrêter le parcours si le rationnel est vide
   if (rat == NULL)
     {
       return;
@@ -400,8 +403,11 @@ Ensemble *premier(Rationnel *rat)
   return e;
 }
 
+/*
+  parcours préfixe inversé (on commence par le fils droit puis le fils gauche quand c'est utile) permettant de former l'ensemble dernier.
+*/
 void parcours_dernier(Rationnel *rat, Ensemble * dernier){
-  //arrêter le parcours
+  //arrêter le parcours si le rationnel est vide
   if (rat == NULL)
     {
       printf("∅");
@@ -424,7 +430,7 @@ void parcours_dernier(Rationnel *rat, Ensemble * dernier){
       break;
 
       //lors d'une concaténation, on ne prend que le fils droit.
-      //si fils droit contient ε on autorise le fils gauche
+      //si fils droit est remplaçable par ε on autorise le fils gauche
     case CONCAT:
       parcours_dernier(fils_droit(rat), dernier);
       if(contient_mot_vide(fils_droit(rat))){
@@ -432,7 +438,7 @@ void parcours_dernier(Rationnel *rat, Ensemble * dernier){
       }
       break;
 
-      //dans le cas de l'étoile, on prend le fils car remplacable par ε 
+      //dans le cas de l'étoile, on prend le fils car remplaçable par ε 
     case STAR:
       parcours_dernier(fils(rat), dernier);
       break;
@@ -442,7 +448,7 @@ void parcours_dernier(Rationnel *rat, Ensemble * dernier){
       break;
     }
 }
- 
+
 Ensemble *dernier(Rationnel *rat)
 {
   Ensemble * e = creer_ensemble(NULL,NULL,NULL);
@@ -450,11 +456,13 @@ Ensemble *dernier(Rationnel *rat)
   return e;
 }
 
+//Nath
 Ensemble *suivant(Rationnel *rat, int position)
 {
   A_FAIRE_RETURN(NULL);
 }
 
+//Nath
 Automate *Glushkov(Rationnel *rat)
 {
   A_FAIRE_RETURN(NULL);
@@ -462,7 +470,33 @@ Automate *Glushkov(Rationnel *rat)
 
 bool meme_langage (const char *expr1, const char* expr2)
 {
-  A_FAIRE_RETURN(true);
+  //pour chaque expression, on la change en rationnel, qui est alors tranformée en automate que l'on minimise.
+  
+  Rationnel * r1 = expression_to_rationnel(expr1);
+  Automate * a1= Glushkov(r1);
+  Automate * am1 = creer_automate_minimal(a1);
+  
+  
+  Rationnel * r2 = expression_to_rationnel(expr2);
+  Automate * a2= Glushkov(r2);
+  Automate * am2 = creer_automate_minimal(a2);
+  
+  //comparaison des deux automates minimaux. soit comparaison automate min à automate min, soit arden...
+  //je pense que arden serait mieux que ce que j'ai fais ^^'
+  if (comparer_ensemble(get_alphabet(am1), get_alphabet(am2)) != 0 ||
+      comparer_ensemble(get_initiaux(am1), get_initiaux(am2)) != 0 ||
+      comparer_ensemble(get_finaux(am1), get_finaux(am2)) != 0 ||
+      comparer_ensemble(get_etats(am1), get_etats(am2)) != 0 ||
+      nombre_de_transitions (am1) != nombre_de_transitions (am2)
+      ){
+    return false;
+  }
+  //comparer les transitions des deux automates ? 
+  
+  //cas où toutes les comparaisons passent : les automates minimaux sont identiques donc leurs langages aussi.
+  return true;
+
+  
 }
 
 Systeme systeme(Automate *automate)
