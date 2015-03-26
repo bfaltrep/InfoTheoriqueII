@@ -33,7 +33,6 @@
 
 int yyparse(Rationnel **rationnel, yyscan_t scanner);
 
-
 int parcours_numeroter_rationnel(Rationnel *rat, int nb);
 int est_feuille(Rationnel *rat);
 
@@ -451,11 +450,13 @@ Ensemble *dernier(Rationnel *rat)
   return e;
 }
 
+//nath
 Ensemble *suivant(Rationnel *rat, int position)
 {
   A_FAIRE_RETURN(NULL);
 }
 
+//nath
 Automate *Glushkov(Rationnel *rat)
 {
   A_FAIRE_RETURN(NULL);
@@ -463,12 +464,66 @@ Automate *Glushkov(Rationnel *rat)
 
 bool meme_langage (const char *expr1, const char* expr2)
 {
+  /*
+  //pour chaque expression, on la change en rationnel, qui est alors tranformée en automate que l'on minimis$
+  
+  Rationnel * r1 = expression_to_rationnel(expr1);
+  Automate * a1= Glushkov(r1);
+  Automate * am1 = creer_automate_minimal(a1);
+  
+  
+  Rationnel * r2 = expression_to_rationnel(expr2);
+  Automate * a2= Glushkov(r2);
+  Automate * am2 = creer_automate_minimal(a2);
+  
+  //on retransforme en rationnel.
+  Rationnel * r1_bis = Arden(am1);
+  Rationnel * r2_bis = Arden(am2);
+  
+  //on compare char à char et tada ? 
+  
+  */
   A_FAIRE_RETURN(true);
 }
 
+// ---------- fonctions locales pour systeme ----------
+
+Systeme creer_systeme(Automate * automate){
+  int nbEtats = taille_ensemble(get_etats (automate));
+  Systeme s = malloc(sizeof(Rationnel **) * nbEtats);
+  for(int i = 0 ; i < nbEtats ; i++){
+    //toutes les cases de la matrice sont initialisées à ∅
+    s[i] = calloc(nbEtats+1,sizeof(Rationnel *));
+  }
+  return s;
+}
+
+/*
+ * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
+*/
+void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
+  //char l[2] = {lettre, '\0'};
+  //printf("origine %d, fin %d\n",origine,fin);
+  ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
+}
+
+// ------------------------------
+
 Systeme systeme(Automate *automate)
 {
-  A_FAIRE_RETURN(NULL);
+  Systeme s =  creer_systeme(automate);
+  
+  //remplissage de la matrice en fonction des transition : les n premières colonnes.
+  pour_toute_transition (automate, ajoute_dans_systeme, (void *)s);
+  
+  //remplissage de la dernière colonne correspondant à ε
+  int size = taille_ensemble(get_etats(automate));
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(automate));
+  while (!iterateur_ensemble_est_vide(ens_i)){
+    s[get_element(ens_i)][size] = rationnel( EPSILON,0,0,0,NULL,NULL,NULL,NULL);
+    ens_i = iterateur_suivant_ensemble(ens_i);
+  }
+  return s;
 }
 
 void print_ligne(Rationnel **ligne, int n)
