@@ -462,28 +462,44 @@ Automate *Glushkov(Rationnel *rat)
   A_FAIRE_RETURN(NULL);
 }
 
+// -------------------------
+
+Automate * complementaire (Automate * automate){
+  Automate * comp = copier_automate (automate);
+
+  Ensemble * nouveau_final = copier_ensemble(get_etats(comp));
+  retirer_elements(nouveau_final,get_finaux(automate));
+
+  comp->finaux = nouveau_final;
+  return comp;
+}
+
+// -------------------------
+
 bool meme_langage (const char *expr1, const char* expr2)
 {
-  /*
-  //pour chaque expression, on la change en rationnel, qui est alors tranformée en automate que l'on minimis$
-  
+  //pour chaque expression, on la change en rationnel, qui est alors tranformée en automate que l'on minimise
   Rationnel * r1 = expression_to_rationnel(expr1);
   Automate * a1= Glushkov(r1);
   Automate * am1 = creer_automate_minimal(a1);
   
-  
   Rationnel * r2 = expression_to_rationnel(expr2);
   Automate * a2= Glushkov(r2);
   Automate * am2 = creer_automate_minimal(a2);
+
+  //on test si inter(complementaire(am1),am2) = ensemble vide soit am2 inclus dans am1
+  Automate * intersection = creer_intersection_des_automates (complementaire(am1),am2);
+  if(get_etats(intersection) != NULL){
+    return false;
+  }
+  //on test si inter(complementaire(am2),am1) = ensemble vide soit am1 inclus dans am2
+  Automate * intersection2 = creer_intersection_des_automates (complementaire(am2),am1);
+  if(get_etats(intersection2) != NULL){
+    return false;
+  }
   
-  //on retransforme en rationnel.
-  Rationnel * r1_bis = Arden(am1);
-  Rationnel * r2_bis = Arden(am2);
-  
-  //on compare char à char et tada ? 
-  
-  */
-  A_FAIRE_RETURN(true);
+  //si la double inclusion est correct, alors il s'agit du meme langage
+  return true;
 }
 
 // ---------- fonctions locales pour systeme ----------
