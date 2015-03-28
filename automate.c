@@ -652,7 +652,7 @@ void inverser_origine_destination(int origine, char lettre, int fin, void* data 
 
 /*
   Ajoute un état initial à l'automate transmis dans data.
-  l'état ajouté correspond à élément.
+  l'état ajouté correspond à element.
 */
 void copier_etat_initial(const intptr_t element, void * data){
   ajouter_etat_initial( ((Automate *) data), element);
@@ -660,7 +660,7 @@ void copier_etat_initial(const intptr_t element, void * data){
 
 /*
   Ajoute un état final à l'automate transmis dans data.
-  l'état ajouté correspond à élément.
+  l'état ajouté correspond à element.
 */
 void copier_etat_final(const intptr_t element, void * data){
   ajouter_etat_final( ((Automate *) data), element);
@@ -677,10 +677,7 @@ Automate *miroir( const Automate * automate){
   //inverse initiaux et finaux.
   pour_tout_element( automate->finaux, copier_etat_initial, ((Automate *) a));
   pour_tout_element( automate->initiaux, copier_etat_final, ((Automate *) a));
-  //déterminiser
-  Automate * aDeterministe = creer_automate_deterministe (a);
-  liberer_automate (a);
-  return aDeterministe;
+  return a;
 }
 
 
@@ -868,10 +865,16 @@ Automate * creer_automate_minimal( const Automate* automate ){
   
   //on calcul le miroir de l'automate passé en paramètre et on le déterminise
   Automate * aMiroir = miroir(automate);
+  Automate * aDeterministe = creer_automate_deterministe (aMiroir);
+  liberer_automate (aMiroir);
+  
   //on calcul le miroir de aMiroir et on le déterminise
-  Automate * aMM = miroir(aMiroir);
-  liberer_automate(aMiroir);
+  Automate * aMM = miroir(aDeterministe);
+  liberer_automate(aDeterministe);
+  aDeterministe = creer_automate_deterministe (aMM);
+  liberer_automate(aMM);
+  
   //on retourne alors un automate minimal 
-  return aMM;
+  return aDeterministe;
 }
 

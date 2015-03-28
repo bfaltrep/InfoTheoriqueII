@@ -33,10 +33,6 @@
 
 int yyparse(Rationnel **rationnel, yyscan_t scanner);
 
-int parcours_numeroter_rationnel(Rationnel *rat, int nb);
-int est_feuille(Rationnel *rat);
-
-
 Rationnel *rationnel(Noeud etiquette, char lettre, int position_min, int position_max, void *data, Rationnel *gauche, Rationnel *droit, Rationnel *pere)
 {
    Rationnel *rat;
@@ -281,18 +277,10 @@ int rationnel_to_dot_aux(Rationnel *rat, FILE *output, int pere, int noeud_coura
 }
 
 
-/*    FAIT PAR NOUS ! SI ERREURS, VIENT DE CE QUI EST DESSOUS    */
+/*    PARTIE A FAIRE     */
 
 /*
-  ajoute la numérotation des éléments de la fonction rationnelle.
-*/
-void numeroter_rationnel(Rationnel *rat)
-{
-  parcours_numeroter_rationnel(rat, 1);
-}
-
-/*
-  parcours de l'arbre affectant les valeurs à position_min et position_max aux noeuds.
+  parcours de l'arbre affectant les valeurs à position_min et position_max pour chaque noeud.
 */
 int parcours_numeroter_rationnel(Rationnel *rat, int nb){
   
@@ -303,7 +291,8 @@ int parcours_numeroter_rationnel(Rationnel *rat, int nb){
   }
 
   rat->position_min = nb;
-  //dans les noeuds internes, il y a forcément un fils gauche.
+  //dans les noeuds internes(union, star ou concat) il y a forcément un fils gauche.
+  //prend la valeur de la dernière lettre parcourue dans le fils gauche (donc la plus grande du fils gauche)
   int tmp = parcours_numeroter_rationnel(rat->gauche, nb);
 
   //union/concat ont un fils droit, pas star
@@ -316,16 +305,18 @@ int parcours_numeroter_rationnel(Rationnel *rat, int nb){
   return rat->position_max;
 }
 
-
-/*indique si le rationnel passé en paramètre est une feuille de l'arbre.*/
-int est_feuille(Rationnel *rat){
-  return rat->etiquette == EPSILON || rat->etiquette == LETTRE;
+/*
+  ajoute la numérotation des éléments de la fonction rationnelle.
+*/
+void numeroter_rationnel(Rationnel *rat)
+{
+  parcours_numeroter_rationnel(rat, 1);
 }
 
 /*
 **
 ** @date 
-** @details recherche d'un mot vide dans un rationnel
+** @details Retourne si le rationnel peut être remplacé par le mot vide.
 */
 bool contient_mot_vide(Rationnel *rat)
 {
@@ -335,13 +326,16 @@ bool contient_mot_vide(Rationnel *rat)
 
     case STAR:
       return true;
-
+      
+      //pour exp = exp1 + exp 2 : si l'un ou l'autre est remplacable par epsilon, exp l'est aussi.
     case UNION:
       return contient_mot_vide(fils_gauche(rat)) || contient_mot_vide(fils_droit(rat));
-      
+
+      //pour exp = exp1.exp2, il faut que les deux soient remplacables par epsilon pour que exp le soit.
     case CONCAT:
       return contient_mot_vide(fils_gauche(rat)) && contient_mot_vide(fils_droit(rat));
-      
+
+      //une lettre n'est pas remplaçable par epsilon
     case LETTRE:
       return false;
 
@@ -352,7 +346,7 @@ bool contient_mot_vide(Rationnel *rat)
     
 }
 
-void parcours_premier(Rationnel *rat, Ensemble * premier){
+void parcours_prem_dern(Rationnel *rat, Ensemble * ensemble, int prem_dern){
   //arrêter le parcours
   if (rat == NULL)
     {
@@ -361,30 +355,49 @@ void parcours_premier(Rationnel *rat, Ensemble * premier){
    
   switch(get_etiquette(rat))
     {
-      //on ne numerote ni ne considère les epsilons afin d'obtenir un graphe sans transitions epsilons
+      //on ne numerote ni ne considère les epsilons
     case EPSILON:
       break;
     case LETTRE:
       //get_position_min(rat) == get_position_max(rat), on prend indifferemment la valeur
-      ajouter_element(premier,get_position_min(rat));
+      ajouter_element(ensemble,get_position_min(rat));
       break;
 
     case UNION:
-      parcours_premier(fils_gauche(rat), premier);
-      parcours_premier(fils_droit(rat), premier);
+      if(prem_dern)
+	{
+	  parcours_prem_dern(fils_gauche(rat), ensemble, prem_dern);
+	  parcours_prem_dern(fils_droit(rat), ensemble, prem_dern);
+	}
+      else
+	{
+	  parcours_prem_dern(fils_droit(rat), ensemble, prem_dern);
+	  parcours_prem_dern(fils_gauche(rat), ensemble, prem_dern);
+	}
       break;
 
 
     case CONCAT:
-      parcours_premier(fils_gauche(rat), premier);
-      //si fils gauche remplacable par ε on peut intégrer des éléments du fils droit à premier
-      if(contient_mot_vide(fils_gauche(rat))){
-	parcours_premier(fils_droit(rat), premier);
+      if(prem_dern)
+	{
+	  parcours_prem_dern(fils_gauche(rat), ensemble, prem_dern);
+	  //si fils gauche remplacable par ε on peut intégrer des éléments du fils droit à premier
+	  if(contient_mot_vide(fils_gauche(rat))){
+	    parcours_prem_dern(fils_droit(rat), ensemble, prem_dern);
+	  }
+	}
+      else{
+	//lors d'une concaténation, on prend le fils droit.
+	parcours_prem_dern(fils_droit(rat), ensemble, prem_dern);
+	//si fils droit contient ε on autorise le fils gauche
+	if(contient_mot_vide(fils_droit(rat))){
+	  parcours_prem_dern(fils_gauche(rat), ensemble, prem_dern);
+	}
       }
       break;
 
     case STAR:
-      parcours_premier(fils(rat), premier);
+      parcours_prem_dern(fils(rat), ensemble, prem_dern);
       break;
 
     default:
@@ -396,57 +409,14 @@ void parcours_premier(Rationnel *rat, Ensemble * premier){
 Ensemble *premier(Rationnel *rat)
 {
   Ensemble * e = creer_ensemble(NULL,NULL,NULL);
-  parcours_premier(rat,e);
+  parcours_prem_dern(rat,e,1);
   return e;
-}
-
-void parcours_dernier(Rationnel *rat, Ensemble * dernier){
-  //arrêter le parcours
-  if (rat == NULL)
-    {
-      printf("∅");
-      return;
-    }
-   
-  switch(get_etiquette(rat))
-    {
-    case EPSILON:
-      break;
-    case LETTRE:
-      //get_position_min(rat) == get_position_max(rat), on prend indifferemment la valeur
-      ajouter_element(dernier,get_position_min(rat));
-      break;
-
-      //lors de l'union, on intègre les deux fils aux premiers.
-    case UNION:
-      parcours_dernier(fils_droit(rat), dernier);
-      parcours_dernier(fils_gauche(rat), dernier);
-      break;
-
-      //lors d'une concaténation, on ne prend que le fils droit.
-      //si fils droit contient ε on autorise le fils gauche
-    case CONCAT:
-      parcours_dernier(fils_droit(rat), dernier);
-      if(contient_mot_vide(fils_droit(rat))){
-	parcours_dernier(fils_gauche(rat), dernier);
-      }
-      break;
-
-      //dans le cas de l'étoile, on prend le fils car remplacable par ε 
-    case STAR:
-      parcours_dernier(fils(rat), dernier);
-      break;
-
-    default:
-      assert(false);
-      break;
-    }
 }
  
 Ensemble *dernier(Rationnel *rat)
 {
   Ensemble * e = creer_ensemble(NULL,NULL,NULL);
-  parcours_dernier(rat,e);
+  parcours_prem_dern(rat,e,0);
   return e;
 }
 
@@ -462,8 +432,9 @@ Automate *Glushkov(Rationnel *rat)
   A_FAIRE_RETURN(NULL);
 }
 
-// -------------------------
-
+/*
+  retourne un nouvel automate qui est le complémentaire de l'automate en paramètre.
+*/
 Automate * complementaire (Automate * automate){
   Automate * comp = copier_automate (automate);
 
@@ -473,8 +444,6 @@ Automate * complementaire (Automate * automate){
   comp->finaux = nouveau_final;
   return comp;
 }
-
-// -------------------------
 
 bool meme_langage (const char *expr1, const char* expr2)
 {
@@ -487,18 +456,18 @@ bool meme_langage (const char *expr1, const char* expr2)
   Automate * a2= Glushkov(r2);
   Automate * am2 = creer_automate_minimal(a2);
 
-  //on test si inter(complementaire(am1),am2) = ensemble vide soit am2 inclus dans am1
+  //on test si inter(complementaire(am1),am2) = ensemble vide soit :  am2 inclus dans am1
   Automate * intersection = creer_intersection_des_automates (complementaire(am1),am2);
   if(get_etats(intersection) != NULL){
     return false;
   }
-  //on test si inter(complementaire(am2),am1) = ensemble vide soit am1 inclus dans am2
+  //on test si inter(complementaire(am2),am1) = ensemble vide soit : am1 inclus dans am2
   Automate * intersection2 = creer_intersection_des_automates (complementaire(am2),am1);
   if(get_etats(intersection2) != NULL){
     return false;
   }
   
-  //si la double inclusion est correct, alors il s'agit du meme langage
+  //si la double inclusion est correcte, alors il s'agit du meme langage
   return true;
 }
 
@@ -518,7 +487,6 @@ Systeme creer_systeme(Automate * automate){
  * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
 */
 void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
-  //char l[2] = {lettre, '\0'};
   //printf("origine %d, fin %d\n",origine,fin);
   ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
 }
@@ -539,6 +507,7 @@ Systeme systeme(Automate *automate)
     s[get_element(ens_i)][size] = rationnel( EPSILON,0,0,0,NULL,NULL,NULL,NULL);
     ens_i = iterateur_suivant_ensemble(ens_i);
   }
+  
   return s;
 }
 
@@ -561,6 +530,8 @@ void print_systeme(Systeme systeme, int n)
       print_ligne(systeme[i], n);
     }
 }
+
+/*     PARTIE 2     */
 
 Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int n)
 {
