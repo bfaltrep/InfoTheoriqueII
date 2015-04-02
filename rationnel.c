@@ -595,8 +595,58 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
 }
 
 //nath
-Automate *Glushkov(Rationnel *rat)
-{
+Automate *Glushkov(Rationnel *rat){
+    
+    Automate* a = creer_automate();
+    char c =0;
+    numeroter_rationnel(rat);
+    
+    int nb_positions = rat -> position_max;
+    
+    ajouter_etat_initial(a,0);
+    
+    /** si l'expression rationnelle est effaçable **/ 
+    if ( contient_mot_vide(rat))
+        ajouter_etat_final(res,0);
+    
+    //on rajoute les états premiers 
+    Ensemble* pr = premier(rat);
+    
+    for (it1 = premier_iterateur_ensemble(pr) ;         !iterateur_est_vide(it1) ; it1 = iterateur_suivant_ensemble(it1)) {
+        ajouter_etat(res,get_element(it1));
+        c = get_lettre_pour_position(rat, get_element(it1));
+        ajouter_transition(res,0,c,get_element(it1));
+    }
+    liberer_ensemble(pr);
+    /** Rajout des suivants **/
+    
+    for (int i=1; i<= nb_position; i++){
+        Ensemble* suivant=suivant (rat,i);
+        
+        for (it1 = premier_iterateur_ensemble(suivant);
+             !iterateur_est_vide(it1); it1= iterateur_suivant_ensemble(it1)) {
+            ajouter_etat(res,i);
+            c = get_lettre_pour_position(rat,get_element(it1));
+            ajouter_transition(res,i,c,get_element(it1));
+        }
+        liberer_element(suivant);
+    }
+    
+    /** Rajout des états finaux**/
+
+    Ensemble* dernier = dernier(rat);
+    for (it1 = premier_iterateur_ensemble(dernier); !iterateur_est_vide(it1); it1 = iterateur_suivant_ensemble(it1))
+    {ajouter_etat_final(res, get_element(it1));
+    }
+    return res;
+}
+    
+    Ensemble* dernier=dernier(rat);
+    
+    for
+        
+    
+/**{
   Automate * a = creer_automate ();
   //on rajoute l'état initial, dit ε
   ajouter_etat_initial( a, 0);
@@ -630,7 +680,7 @@ Automate *Glushkov(Rationnel *rat)
     ei = iterateur_suivant_ensemble(ei);
   }
    A_FAIRE_RETURN(NULL);
-}
+}**/
 
 /*
   retourne un nouvel automate qui est le complémentaire de l'automate en paramètre.
