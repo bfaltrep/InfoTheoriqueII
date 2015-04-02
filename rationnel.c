@@ -607,7 +607,7 @@ Automate *Glushkov(Rationnel *rat){
     
     /** si l'expression rationnelle est effaçable **/ 
     if ( contient_mot_vide(rat))
-        ajouter_etat_final(res,0);
+        ajouter_etat_final(a,0);
     
     //on rajoute les états premiers 
     Ensemble* pr = premier(rat);
@@ -620,7 +620,7 @@ Automate *Glushkov(Rationnel *rat){
     liberer_ensemble(pr);
     /** Rajout des suivants **/
     
-    for (int i=1; i<= nb_position; i++){
+    for (int i=1; i<= nb_positions; i++){
         Ensemble* suivant=suivant (rat,i);
         
         for (it1 = premier_iterateur_ensemble(suivant);
