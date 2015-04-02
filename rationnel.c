@@ -314,6 +314,33 @@ void numeroter_rationnel(Rationnel *rat)
 }
 
 /*
+** @details Permet de lier les père et les fils
+**
+*/
+void lier_pere_fils(Rationnel * rat){
+   if ((get_etiquette(rat) == CONCAT) 
+      || (get_etiquette(rat) == UNION)){
+      if (fils_gauche(rat) != NULL){
+         fils_gauche(rat)->pere = rat;
+         lier_pere_fils(fils_gauche(rat));
+      }
+
+      if (fils_droit(rat) != NULL){
+         fils_droit(rat)->pere = rat;
+         lier_pere_fils(fils_droit(rat));
+      }
+   }
+   else if (get_etiquette(rat) == STAR){
+      if (fils(rat) != NULL){
+         fils(rat)->pere = rat;
+         lier_pere_fils(fils(rat));
+      }
+   }
+
+   
+}
+
+/*
 **
 ** @date 
 ** @details Retourne si le rationnel peut être remplacé par le mot vide.
@@ -420,10 +447,137 @@ Ensemble *dernier(Rationnel *rat)
   return e;
 }
 
-//nath
+Ensemble* trouver_suivant(rat,position){
+ Ensemble* e = creer_ensemble(NULL,NULL,NULL);  
+    
+    /** cas de l'étoile **/
+    
+    if (get_etiquette(rat) == STAR){
+        
+        /** seconde partie de l'étoile**/
+        if (get_position_max(fils(rat))== position){
+            /** soit on passe au caractère suivant**/
+            Ensemble* eSuivant = suivant(fils(rat),position);
+            Ensemble* ePremier = premier(fils(rat));
+            
+            Ensemble* eFinal = creer_union_ensemble(eSuivant, ePremier);
+            
+            ajouter_elements(e, eFinal);
+            
+            liberer_ensemble(eSuivant);
+            liberer_ensemble(ePremier);
+            liberer_ensemble(eFinal);
+        }
+        /** autre cas **/
+        else {
+        Ensemble* e1 = suivant(fils(rat),position);
+        ajouter_elements(e,e1);
+        liberer_ensemble(e1);
+        }
+        
+        /** si on a un symbole **/
+        
+        else if ((get_etiquette (rat) == EPSILON) ||(get_etiquette(rat) == LETTRE)){
+            return creer_ensemble(NULL,NULL,NULL);
+        }
+        else if (get_etiquette(fils_gauche(rat)) != EPSILON) {
+            
+            /** si nous sommes dans le sous-arbre gauche**/ 
+            
+            if ((get_position_min(fils_gauche(rat)) == position) && 
+         (get_position_max(fils_gauche(rat)) != get_position_min(fils_gauche(rat)))) {
+
+                if (get_position_max(fils_gauche(rat)) == (position +1)){
+                    /** on cherche le suivant tout a gauche**/
+                    Ensemble* e1 = dernier(fils_gauche(rat));
+                    
+                    ajouter_elements(e,e1);
+                    
+                    liberer_ensemble(e1);
+                    
+                }
+            else{
+                /** recherche du noeud précis**/
+                Ensemble* e1 = suivant(fils_gauche(rat),position);
+                ajouter_elements(e,e1);
+                
+                liberer_ensemble(e1);
+            }
+        }
+            /** notre point de départ différents **/
+        else if (get_position_max(fils-gauche(rat)) == position){
+            /**
+            ** union des prmiers du sous-arbres
+            ** s'il est effacable alors premiers de droit
+            **/
+         Ensemble* e1 = suivant(fils_gauche(rat), position);
+
+         ajouter_elements(e, e1);
+
+         Rationnel* nodeTest = rat; 
+      /** Tant que notre sous-arbre droit est effaçable ET que nous ne sommes pas à la racine**/
+         while (contient_mot_vide(fils_droit(nodeTest)) && (!est_racine(nodeTest))){
+         
+            Ensemble* eDroit = premier(fils_droit(nodeTest));
+            ajouter_elements(e, eDroit);
+            liberer_ensemble(eDroit);
+
+            nodeTest = pere(nodeTest);
+         }
+
+      /** On a atteint soit un sous-arbre droit non effaçable, soit la racine.
+      ** Dans les deux cas, on va alors ajouter les premiers **/
+         Ensemble* eDroit = premier(fils_droit(nodeTest));
+         ajouter_elements(e, eDroit);
+         liberer_ensemble(eDroit);
+
+         liberer_ensemble(e1);
+      }
+
+      // Cas où notre point de départ est ni la première feuille ni la dernière
+      //    feuille dans le sous-arbre gauche
+      else if (position < get_position_max(fils_gauche(rat))){
+         Ensemble* e1 = suivant(fils_gauche(rat), position);
+         ajouter_elements(e, e1);
+         liberer_ensemble(e1);
+      }
+      // Cas où notre point de départ est tout à gauche dans le sous-arbre de droite
+      else if (get_position_min(fils_droit(rat)) == position){
+         if (get_position_max(fils_droit(rat)) == position){
+            // Cas d'une feuille en bout d'arbre
+            return creer_ensemble(NULL, NULL, NULL);
+         }
+         else {
+            Ensemble* e1 = suivant(fils_droit(rat), position);
+            ajouter_elements(e, e1);
+            liberer_ensemble(e1);
+         }
+      }
+      // Cas de notre position de départ quelque part dans le sous-arbre de droite
+      else if (position > get_position_min(fils_droit(rat))){
+         Ensemble* e1 = suivant(fils_droit(rat), position);
+         ajouter_elements(e, e1);
+         liberer_ensemble(e1);
+      }
+
+   }
+
+   return e;
+}
+}
+    
+    
+    
+    
+    
+    
+    
+    
+    
 Ensemble *suivant(Rationnel *rat, int position)
 {
-  A_FAIRE_RETURN(NULL);
+   lier_pere_fils(rat);
+   return trouver_suivant(rat, position);
 }
 
 //nath
