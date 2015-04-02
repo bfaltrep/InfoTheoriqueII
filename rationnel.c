@@ -613,9 +613,9 @@ Automate *Glushkov(Rationnel *rat){
     Ensemble* pr = premier(rat);
     
     for (it1 = premier_iterateur_ensemble(pr) ;         !iterateur_est_vide(it1) ; it1 = iterateur_suivant_ensemble(it1)) {
-        ajouter_etat(res,get_element(it1));
+        ajouter_etat(a,get_element(it1));
         c = get_lettre_pour_position(rat, get_element(it1));
-        ajouter_transition(res,0,c,get_element(it1));
+        ajouter_transition(a,0,c,get_element(it1));
     }
     liberer_ensemble(pr);
     /** Rajout des suivants **/
@@ -625,9 +625,9 @@ Automate *Glushkov(Rationnel *rat){
         
         for (it1 = premier_iterateur_ensemble(suivant);
              !iterateur_est_vide(it1); it1= iterateur_suivant_ensemble(it1)) {
-            ajouter_etat(res,i);
+            ajouter_etat(a,i);
             c = get_lettre_pour_position(rat,get_element(it1));
-            ajouter_transition(res,i,c,get_element(it1));
+            ajouter_transition(a,i,c,get_element(it1));
         }
         liberer_element(suivant);
     }
@@ -636,15 +636,11 @@ Automate *Glushkov(Rationnel *rat){
 
     Ensemble* dernier = dernier(rat);
     for (it1 = premier_iterateur_ensemble(dernier); !iterateur_est_vide(it1); it1 = iterateur_suivant_ensemble(it1))
-    {ajouter_etat_final(res, get_element(it1));
+    {ajouter_etat_final(a, get_element(it1));
     }
-    return res;
+    return a;
 }
     
-    Ensemble* dernier=dernier(rat);
-    
-    for
-        
     
 /**{
   Automate * a = creer_automate ();
