@@ -579,10 +579,57 @@ Ensemble *suivant(Rationnel *rat, int position)
    return trouver_suivant(rat, position);
 }
 
+Rationnel * get_rationnel(Rationnel * r, int pos){
+    if(r->position_min > pos){
+        printf("[ERREUR] durant get_rationnel : %d > %d\n", r->position_min, pos);
+    return NULL;
+  }
+  if(r->etiquette == LETTRE && pos == r->position_min){
+    return r;
+  }
+  if (pos > r->position_max){
+    return get_rationnel(r->droit, pos);
+  }else{
+    return get_rationnel(r->gauche, pos);
+  }
+}
+
 //nath
 Automate *Glushkov(Rationnel *rat)
 {
-  A_FAIRE_RETURN(NULL);
+  Automate * a = creer_automate ();
+  //on rajoute l'état initial, dit ε
+  ajouter_etat_initial( a, 0);
+  Ensemble * prem = premier(rat);
+  Ensemble_iterateur ei = premier_iterateur_ensemble(prem);
+  int i;
+  //ajouter les transitions de ε vers les initiaux de rat.
+  while (!iterateur_ensemble_est_vide(ei)){
+    i = get_element(ei);
+    ajouter_transition (a, 0, get_lettre (get_rationnel(rat, i)), i);
+    ei = iterateur_suivant_ensemble(ei);
+  }
+  
+  //Rationnel * tmp;
+  //pour chaque lettre du rationnel, on créé l'état associé et les transitions dont il est la destination
+  for (i  = 1 ; i <= rat->position_max ; i++){
+    //tmp = get_rationnel(rat, i);
+    //Ensemble * premier = premier(tmp);
+    //Ensemble * suivant = suivant(tmp,i);
+    //Ensemble *dernier(Rationnel *rat);
+    //switch case
+    //ajouter_transition (a, origine, tmp->lettre, i);
+  }
+
+
+  //finaux correspondent aux derniers de rat.
+  Ensemble * dern = dernier(rat);
+  ei = premier_iterateur_ensemble(dern);
+  while (!iterateur_ensemble_est_vide(ei)){
+    ajouter_etat_final(a, get_element(ei));
+    ei = iterateur_suivant_ensemble(ei);
+  }
+   A_FAIRE_RETURN(NULL);
 }
 
 /*
