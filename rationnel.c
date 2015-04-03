@@ -594,13 +594,7 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
   }
 }
 char get_lettre_in_position(Rationnel * rat, int pos) {
-    rat=get_rationnel(rat,pos);
-    if (rat->etiquette == LETTRE && pos == rat->position_min){
-        return get_lettre(rat);
-    }
-    return -1;
-}
-  /**if(rat->etiquette == LETTRE && pos == rat->position_min){
+  if(rat->etiquette == LETTRE && pos == rat->position_min){
     get_lettre(rat);
   }
   else if ((get_etiquette(rat) == CONCAT)
@@ -618,9 +612,9 @@ char get_lettre_in_position(Rationnel * rat, int pos) {
       }
    }
    
-    return 0;
+    return -1;
 
-}**/
+}
 //nath
 Automate *Glushkov(Rationnel *rat){
     
