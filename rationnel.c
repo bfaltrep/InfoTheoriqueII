@@ -594,10 +594,9 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
   }
 }
 char get_lettre_in_position(Rationnel * rat, int pos) {
-    char c=0;
     rat=get_rationnel(rat,pos);
     if (rat->etiquette == LETTRE && pos == rat->position_min){
-        get_lettre(rat);
+        return get_lettre(rat);
     }
     return -1;
 }
