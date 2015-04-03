@@ -594,18 +594,24 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
   }
 }
 char get_lettre_in_position(Rationnel * rat, int pos) {
-   if(rat->position_min > pos){
-        printf("[ERREUR] durant get_rationnel : %d > %d\n", rat->position_min, pos);
-    return 0;
-  }
   if(rat->etiquette == LETTRE && pos == rat->position_min){
     get_lettre(rat);
   }
-  if (pos > rat->position_max){
-    return get_lettre_in_position(rat->droit, pos);
-  }else{
-    return get_lettre_in_position(rat->gauche, pos);
-  }
+  else if ((get_etiquette(rat) == CONCAT)
+            || (get_etiquette(rat) == UNION)) {
+      if (pos <= fils_gauche(rat)->position_max ) {
+         return get_lettre_in_position(fils_gauche(rat), pos);
+      }
+      else {
+         return get_lettre_in_position(fils_droit(rat), pos);
+      }
+   }
+   else if (get_etiquette(rat) == STAR) {
+      if (fils(rat) != NULL) {
+         return get_lettre_in_position(fils(rat), pos);
+      }
+   }
+
 }
 //nath
 Automate *Glushkov(Rationnel *rat){
