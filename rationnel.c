@@ -602,9 +602,9 @@ char get_lettre_in_position(Rationnel * rat, int pos) {
     get_lettre(rat);
   }
   if (pos > rat->position_max){
-    return get_rationnel(rat->droit, pos);
+    return get_lettre_in_position(rat->droit, pos);
   }else{
-    return get_rationnel(rat->gauche, pos);
+    return get_lettre_in_position(rat->gauche, pos);
   }
 }
 //nath
