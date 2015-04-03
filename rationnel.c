@@ -593,13 +593,26 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
     return get_rationnel(r->gauche, pos);
   }
 }
-
+char get_letter_in_position(Rationnel * rat, int pos) {
+   if(rat->position_min > pos){
+        printf("[ERREUR] durant get_rationnel : %d > %d\n", rat->position_min, pos);
+    return NULL;
+  }
+  if(rat->etiquette == LETTRE && pos == rat->position_min){
+    get_lettre(rat);
+  }
+  if (pos > rat->position_max){
+    return get_rationnel(rat->droit, pos);
+  }else{
+    return get_rationnel(rat->gauche, pos);
+  }
+}
 //nath
 Automate *Glushkov(Rationnel *rat){
     
     Automate* a = creer_automate();
     Ensemble_iterateur it;
-    char c =0;
+    char c = 0;
     numeroter_rationnel(rat);
     
     int nb_positions = rat -> position_max;
@@ -615,7 +628,7 @@ Automate *Glushkov(Rationnel *rat){
     
     for (it = premier_iterateur_ensemble(prems) ;         !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
         ajouter_etat(a,get_element(it));
-        c = get_lettre_pour_position(rat, get_element(it));
+        c = get_lettre_in_position(rat, get_element(it));
         ajouter_transition(a,0,c,get_element(it));
     }
     liberer_ensemble(prems);
@@ -627,10 +640,10 @@ Automate *Glushkov(Rationnel *rat){
         for (it = premier_iterateur_ensemble(suivnt);
              !iterateur_est_vide(it); it= iterateur_suivant_ensemble(it)) {
             ajouter_etat(a,i);
-            c = get_lettre_pour_position(rat,get_element(it));
+            c = get_lettre_in_position(rat,get_element(it));
             ajouter_transition(a,i,c,get_element(it));
         }
-        liberer_element(suivnt);
+        liberer_ensemble(suivnt);
     }
     
     /** Rajout des états finaux**/
