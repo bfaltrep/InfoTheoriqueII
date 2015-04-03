@@ -598,6 +598,7 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
 Automate *Glushkov(Rationnel *rat){
     
     Automate* a = creer_automate();
+    Ensemble_iterateur it;
     char c =0;
     numeroter_rationnel(rat);
     
@@ -610,34 +611,35 @@ Automate *Glushkov(Rationnel *rat){
         ajouter_etat_final(a,0);
     
     //on rajoute les états premiers 
-    Ensemble* pr = premier(rat);
+    Ensemble* prems = premier(rat);
     
-    for (it1 = premier_iterateur_ensemble(pr) ;         !iterateur_est_vide(it1) ; it1 = iterateur_suivant_ensemble(it1)) {
-        ajouter_etat(a,get_element(it1));
-        c = get_lettre_pour_position(rat, get_element(it1));
-        ajouter_transition(a,0,c,get_element(it1));
+    for (it = premier_iterateur_ensemble(prems) ;         !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
+        ajouter_etat(a,get_element(it));
+        c = get_lettre_pour_position(rat, get_element(it));
+        ajouter_transition(a,0,c,get_element(it));
     }
-    liberer_ensemble(pr);
+    liberer_ensemble(prems);
     /** Rajout des suivants **/
     
     for (int i=1; i<= nb_positions; i++){
-        Ensemble* suivant=suivant (rat,i);
+        Ensemble* suivnt=suivant (rat,i);
         
-        for (it1 = premier_iterateur_ensemble(suivant);
-             !iterateur_est_vide(it1); it1= iterateur_suivant_ensemble(it1)) {
+        for (it = premier_iterateur_ensemble(suivnt);
+             !iterateur_est_vide(it); it= iterateur_suivant_ensemble(it)) {
             ajouter_etat(a,i);
-            c = get_lettre_pour_position(rat,get_element(it1));
-            ajouter_transition(a,i,c,get_element(it1));
+            c = get_lettre_pour_position(rat,get_element(it));
+            ajouter_transition(a,i,c,get_element(it));
         }
-        liberer_element(suivant);
+        liberer_element(suivnt);
     }
     
     /** Rajout des états finaux**/
 
-    Ensemble* dernier = dernier(rat);
-    for (it1 = premier_iterateur_ensemble(dernier); !iterateur_est_vide(it1); it1 = iterateur_suivant_ensemble(it1))
-    {ajouter_etat_final(a, get_element(it1));
+    Ensemble* lst = dernier(rat);
+    for (it = premier_iterateur_ensemble(lst); !iterateur_est_vide(it); it = iterateur_suivant_ensemble(it))
+    {ajouter_etat_final(a, get_element(it));
     }
+    liberer_ensemble(lst);
     return a;
 }
     
