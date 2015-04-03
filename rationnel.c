@@ -593,10 +593,10 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
     return get_rationnel(r->gauche, pos);
   }
 }
-char get_letter_in_position(Rationnel * rat, int pos) {
+char get_lettre_in_position(Rationnel * rat, int pos) {
    if(rat->position_min > pos){
         printf("[ERREUR] durant get_rationnel : %d > %d\n", rat->position_min, pos);
-    return NULL;
+    return 0;
   }
   if(rat->etiquette == LETTRE && pos == rat->position_min){
     get_lettre(rat);
