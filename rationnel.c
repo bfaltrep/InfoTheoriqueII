@@ -593,26 +593,74 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
     return get_rationnel(r->gauche, pos);
   }
 }
+
 char get_lettre_in_position(Rationnel * rat, int pos) {
-  if(rat->etiquette == LETTRE && pos == rat->position_min){
-    get_lettre(rat);
+  //on est sur la lettre
+  if(get_etiquette(rat) == LETTRE && pos == rat->position_min){
+    return get_lettre(rat);
   }
+  //concat ou union
   else if ((get_etiquette(rat) == CONCAT)
-            || (get_etiquette(rat) == UNION)) {
-      if (pos <= fils_gauche(rat)->position_max ) {
-         return get_lettre_in_position(fils_gauche(rat), pos);
-      }
-      else {
-         return get_lettre_in_position(fils_droit(rat), pos);
-      }
-   }
-   else if (get_etiquette(rat) == STAR) {
-      if (fils(rat) != NULL) {
-         return get_lettre_in_position(fils(rat), pos);
-      }
-   }
+	   || (get_etiquette(rat) == UNION)) {
+    if (pos <= fils_gauche(rat)->position_max ) {
+      return get_lettre_in_position(fils_gauche(rat), pos);
+    }
+    else {
+      return get_lettre_in_position(fils_droit(rat), pos);
+    }
+  }
+  //star
+  else if (get_etiquette(rat) == STAR) {
+    if (fils(rat) != NULL) {
+      return get_lettre_in_position(fils(rat), pos);
+    }
+  }
+  //fin non void
+  return '9';
+}
+
+void test2(Rationnel * rat){
+    if (rat == NULL)
+    {
+      printf("∅");
+      return;
+    }
+   
+  switch(get_etiquette(rat))
+    {
+    case EPSILON:
+      printf("ε ");
+      break;
+         
+    case LETTRE:
+      printf("\nlettre "); 
+      break;
+
+    case UNION:
+      printf("\n+ ");
+      test2(rat->gauche);
+      test2(rat->droit);
+      break;
+
+    case CONCAT:
+      printf("\n. ");
+      test2(rat->gauche);
+      test2(rat->droit);
+      break;
+
+    case STAR:
+      printf("\n* ");
+      test2(rat->gauche);
+      break;
+
+    default:
+      printf("\nTROLL "); 
+      break;
+    }
 
 }
+
+
 //nath
 Automate *Glushkov(Rationnel *rat){
     
@@ -631,10 +679,12 @@ Automate *Glushkov(Rationnel *rat){
     
     //on rajoute les états premiers 
     Ensemble* prems = premier(rat);
-    
+    print_ensemble(prems,NULL);  //TMP
     for (it = premier_iterateur_ensemble(prems) ;         !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
         ajouter_etat(a,get_element(it));
+	//	c = get_lettre (get_rationnel(rat,get_element(it)));
         c = get_lettre_in_position(rat, get_element(it));
+	fprintf(stderr,"%c\n",c);
         ajouter_transition(a,0,c,get_element(it));
     }
     liberer_ensemble(prems);
@@ -646,6 +696,7 @@ Automate *Glushkov(Rationnel *rat){
         for (it = premier_iterateur_ensemble(suivnt);
              !iterateur_est_vide(it); it= iterateur_suivant_ensemble(it)) {
             ajouter_etat(a,i);
+	    //c = get_lettre (get_rationnel(rat,get_element(it)));
             c = get_lettre_in_position(rat,get_element(it));
             ajouter_transition(a,i,c,get_element(it));
         }
