@@ -700,14 +700,14 @@ return res;
     
     /** Rajout des états finaux**/
 
-    Ensemble* lst = dernier(rat);
+ /*   Ensemble* lst = dernier(rat);
     for (it = premier_iterateur_ensemble(lst); !iterateur_est_vide(it); it = iterateur_suivant_ensemble(it))
     {ajouter_etat_final(a, get_element(it));
     }
     liberer_ensemble(lst);
     return a;
 }
-    
+    */
     
 /**{
   Automate * a = creer_automate ();
