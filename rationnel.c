@@ -619,48 +619,6 @@ char get_lettre_in_position(Rationnel * rat, int pos) {
   return '9';
 }
 
-void test2(Rationnel * rat){
-    if (rat == NULL)
-    {
-      printf("∅");
-      return;
-    }
-   
-  switch(get_etiquette(rat))
-    {
-    case EPSILON:
-      printf("ε ");
-      break;
-         
-    case LETTRE:
-      printf("\nlettre "); 
-      break;
-
-    case UNION:
-      printf("\n+ ");
-      test2(rat->gauche);
-      test2(rat->droit);
-      break;
-
-    case CONCAT:
-      printf("\n. ");
-      test2(rat->gauche);
-      test2(rat->droit);
-      break;
-
-    case STAR:
-      printf("\n* ");
-      test2(rat->gauche);
-      break;
-
-    default:
-      printf("\nTROLL "); 
-      break;
-    }
-
-}
-
-
 //nath
 Automate *Glushkov(Rationnel *rat){
     
@@ -709,47 +667,10 @@ Automate *Glushkov(Rationnel *rat){
     for (it = premier_iterateur_ensemble(lst); !iterateur_est_vide(it); it = iterateur_suivant_ensemble(it))
     {ajouter_etat_final(a, get_element(it));
     }
-    liberer_ensemble(lst);
+    //liberer_ensemble(lst);
     return a;
 }
     
-    
-/**{
-  Automate * a = creer_automate ();
-  //on rajoute l'état initial, dit ε
-  ajouter_etat_initial( a, 0);
-  Ensemble * prem = premier(rat);
-  Ensemble_iterateur ei = premier_iterateur_ensemble(prem);
-  int i;
-  //ajouter les transitions de ε vers les initiaux de rat.
-  while (!iterateur_ensemble_est_vide(ei)){
-    i = get_element(ei);
-    ajouter_transition (a, 0, get_lettre (get_rationnel(rat, i)), i);
-    ei = iterateur_suivant_ensemble(ei);
-  }
-  
-  //Rationnel * tmp;
-  //pour chaque lettre du rationnel, on créé l'état associé et les transitions dont il est la destination
-  for (i  = 1 ; i <= rat->position_max ; i++){
-    //tmp = get_rationnel(rat, i);
-    //Ensemble * premier = premier(tmp);
-    //Ensemble * suivant = suivant(tmp,i);
-    //Ensemble *dernier(Rationnel *rat);
-    //switch case
-    //ajouter_transition (a, origine, tmp->lettre, i);
-  }
-
-
-  //finaux correspondent aux derniers de rat.
-  Ensemble * dern = dernier(rat);
-  ei = premier_iterateur_ensemble(dern);
-  while (!iterateur_ensemble_est_vide(ei)){
-    ajouter_etat_final(a, get_element(ei));
-    ei = iterateur_suivant_ensemble(ei);
-  }
-   A_FAIRE_RETURN(NULL);
-}**/
-
 /*
   retourne un nouvel automate qui est le complémentaire de l'automate en paramètre.
 */
