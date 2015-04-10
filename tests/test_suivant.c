@@ -46,7 +46,7 @@ int test_suivant(){
        rat = expression_to_rationnel("(a.a)*.(b*.c)");
        numeroter_rationnel(rat);
        Ensemble * e = suivant(rat, 2);
-       
+       print_ensemble(e,NULL);
        TEST(
           1
           && est_dans_l_ensemble(e, 1)
@@ -61,7 +61,7 @@ int test_suivant(){
        rat = expression_to_rationnel("(a.a)*.(b+c*).a.b*");
        numeroter_rationnel(rat);
        Ensemble * e = suivant(rat, 2);
-       
+       print_ensemble(e,NULL);
        TEST(
           1
           && est_dans_l_ensemble(e, 1)
