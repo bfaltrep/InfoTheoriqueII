@@ -521,7 +521,6 @@ Automate *Glushkov(Rationnel *rat){
     for (it = premier_iterateur_ensemble(prems) ; !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
       ajouter_etat(a,get_element(it));
       c = get_lettre_in_position(rat, get_element(it));
-      fprintf(stderr,"%c\n",c);
       ajouter_transition(a,0,c,get_element(it));
     }
     liberer_ensemble(prems);
@@ -529,7 +528,7 @@ Automate *Glushkov(Rationnel *rat){
     
     for (int i=1; i<= nb_positions; i++){
       Ensemble* suivnt=suivant (rat,i);
-      print_ensemble(suivnt,NULL);
+      //print_ensemble(suivnt,NULL);
         
       for (it = premier_iterateur_ensemble(suivnt);!iterateur_est_vide(it); it= iterateur_suivant_ensemble(it)) {
 	ajouter_etat(a,i);
@@ -575,20 +574,20 @@ bool meme_langage (const char *expr1, const char* expr2)
   if (comparer_ensemble(get_alphabet (a1),get_alphabet (a2)) != 0){
     return false;
   }
-  
+
+  //seul l'automate minimal est canonique, nous minimisons donc nos automates.
   Automate * am1 = creer_automate_minimal(a1);
   Automate * am2 = creer_automate_minimal(a2);
 
   //on test si inter(complementaire(am1),am2) = ensemble vide soit :  am2 inclus dans am1
-  Automate * intersection = creer_intersection_des_automates (complementaire(am1),am2);
-  print_automate(intersection);
-  if(get_etats(intersection) != NULL){
+  Automate * intersection = creer_intersection_des_automates (complementaire(am1),am2);  
+  if(taille_ensemble(creer_intersection_ensemble(etats_accessibles(intersection,0),get_finaux(intersection))) != 0){
     return false;
   }
+  
   //on test si inter(complementaire(am2),am1) = ensemble vide soit : am1 inclus dans am2
   intersection = creer_intersection_des_automates (complementaire(am2),am1);
-  print_automate(intersection);
-  if(get_etats(intersection) != NULL){
+  if(taille_ensemble(creer_intersection_ensemble(etats_accessibles(intersection,0),get_finaux(intersection))) != 0){
     return false;
   }
 
@@ -612,7 +611,6 @@ Systeme creer_systeme(Automate * automate){
  * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
 */
 void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
-  //printf("origine %d, fin %d\n",origine,fin);
   ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
 }
 
