@@ -313,32 +313,7 @@ void numeroter_rationnel(Rationnel *rat)
   parcours_numeroter_rationnel(rat, 1);
 }
 
-/*
-** @details Permet de lier les père et les fils
-**
-*/
-void lier_pere_fils(Rationnel * rat){
-   if ((get_etiquette(rat) == CONCAT) 
-      || (get_etiquette(rat) == UNION)){
-      if (fils_gauche(rat) != NULL){
-         fils_gauche(rat)->pere = rat;
-         lier_pere_fils(fils_gauche(rat));
-      }
 
-      if (fils_droit(rat) != NULL){
-         fils_droit(rat)->pere = rat;
-         lier_pere_fils(fils_droit(rat));
-      }
-   }
-   else if (get_etiquette(rat) == STAR){
-      if (fils(rat) != NULL){
-         fils(rat)->pere = rat;
-         lier_pere_fils(fils(rat));
-      }
-   }
-
-   
-}
 
 /*
 **
@@ -447,140 +422,8 @@ Ensemble *dernier(Rationnel *rat)
   return e;
 }
 
-
-Ensemble* trouver_suivant(Rationnel * rat, int position){
-   Ensemble* e = creer_ensemble(
-      NULL, NULL, NULL);
-
-   // Etoile
-   if (get_etiquette(rat) == STAR){
-      // Cas où notre caractère est à la fin de l'étoile
-      if (get_position_max(fils(rat)) == position){
-         // Deux choix : on passe au caractère suivant ou on passe à nouveau au premier
-         Ensemble* eSuivant = suivant(fils(rat), position);
-         Ensemble* ePremier = premier(fils(rat));
-
-         Ensemble* eFinal = creer_union_ensemble(eSuivant, ePremier);
-
-         ajouter_elements(e, eFinal);
-
-         liberer_ensemble(eSuivant);
-         liberer_ensemble(ePremier);
-         liberer_ensemble(eFinal);
-      }
-      // Autres cas
-      else {
-         // On ne prend pas en compte l'étoile
-         Ensemble* e1 = suivant(fils(rat), position);
-         ajouter_elements(e, e1);
-         liberer_ensemble(e1);
-      }
-   }
-   // Symbole
-   else if ((get_etiquette(rat) == EPSILON) || (get_etiquette(rat) == LETTRE)){
-      return creer_ensemble(NULL, NULL, NULL);
-   }
-   else if (get_etiquette(fils_gauche(rat)) != EPSILON){
-
-      // Cas où notre point de départ est dans le sous-arbre de gauche
-      //    et que le fils gauche est un noeud interne
-      if ((get_position_min(fils_gauche(rat)) == position) && 
-         (get_position_max(fils_gauche(rat)) != get_position_min(fils_gauche(rat)))) {
-
-         if (get_position_max(fils_gauche(rat)) == (position +1)){
-               // On cherche le suivant de notre caractère situé tout à gauche
-               //    de notre sous-arbre
-            Ensemble* e1 = dernier(fils_gauche(rat));
-
-            ajouter_elements(e, e1);
-
-            liberer_ensemble(e1);
-         }
-         else {
-               // On recherche un noeud plus précis (avec un maximum = position+1)
-            Ensemble* e1 = suivant(fils_gauche(rat), position);
-            ajouter_elements(e, e1);
-
-            liberer_ensemble(e1);
-         }
-      }
-      // Cas où notre point de départ est le dernier caractère du sous-arbre gauche
-      else if (get_position_max(fils_gauche(rat)) == position){
-         // On fait l'union des premiers du sous-arbre droit avec les suivants
-         //    possibles dans le sous-arbre gauche
-         // Cependant, si le sous-arbre droit est effaçable, il faut alors
-         //    aussi prendre les premiers du sous-arbre droit du père de
-         //    notre noeud actuel.
-         Ensemble* e1 = suivant(fils_gauche(rat), position);
-
-         ajouter_elements(e, e1);
-
-         Rationnel* nodeTest = rat; 
-      // Tant que notre sous-arbre droit est effaçable ET que nous ne sommes pas à la racine
-         while (contient_mot_vide(fils_droit(nodeTest)) && (!est_racine(nodeTest))){
-         // On prend les premiers de ce sous-arbre droit pour les ajouter aux suivants possibles
-            Ensemble* eDroit = premier(fils_droit(nodeTest));
-            ajouter_elements(e, eDroit);
-            liberer_ensemble(eDroit);
-
-         // Et on va checker le père
-            nodeTest = pere(nodeTest);
-         }
-
-      // On a atteint soit un sous-arbre droit non effaçable, soit la racine.
-      // Dans les deux cas, on va alors ajouter les premiers 
-         Ensemble* eDroit = premier(fils_droit(nodeTest));
-         ajouter_elements(e, eDroit);
-         liberer_ensemble(eDroit);
-
-         liberer_ensemble(e1);
-      }
-
-      // Cas où notre point de départ est ni la première feuille ni la dernière
-      //    feuille dans le sous-arbre gauche
-      else if (position < get_position_max(fils_gauche(rat))){
-         Ensemble* e1 = suivant(fils_gauche(rat), position);
-         ajouter_elements(e, e1);
-         liberer_ensemble(e1);
-      }
-      // Cas où notre point de départ est tout à gauche dans le sous-arbre de droite
-      else if (get_position_min(fils_droit(rat)) == position){
-         if (get_position_max(fils_droit(rat)) == position){
-            // Cas d'une feuille en bout d'arbre
-            return creer_ensemble(NULL, NULL, NULL);
-         }
-         else {
-            Ensemble* e1 = suivant(fils_droit(rat), position);
-            ajouter_elements(e, e1);
-            liberer_ensemble(e1);
-         }
-      }
-      // Cas de notre position de départ quelque part dans le sous-arbre de droite
-      else if (position > get_position_min(fils_droit(rat))){
-         Ensemble* e1 = suivant(fils_droit(rat), position);
-         ajouter_elements(e, e1);
-         liberer_ensemble(e1);
-      }
-
-   }
-
-   return e;
-}
-    
-    
-    
-    
-    
-    
-    
-Ensemble *suivant(Rationnel *rat, int position)
-{
-   lier_pere_fils(rat);
-   return trouver_suivant(rat, position);
-}
-
 Rationnel * get_rationnel(Rationnel * r, int pos){
-    if(r->position_min > pos){
+    if(r == NULL || r->position_min > pos){
         printf("[ERREUR] durant get_rationnel : %d > %d\n", r->position_min, pos);
     return NULL;
   }
@@ -594,14 +437,53 @@ Rationnel * get_rationnel(Rationnel * r, int pos){
   }
 }
 
+void trouver_suivant(Rationnel * rat, Ensemble * e, int position){
+  if (rat == NULL){
+    return;
+  }
+  
+  switch (get_etiquette(rat)){
+  case LETTRE:
+    break;
+  case EPSILON:
+    break;
+  case UNION :
+    trouver_suivant(rat->gauche,e, position);
+    trouver_suivant(rat->droit,e, position);
+    break;
+  case CONCAT:
+    if (est_dans_l_ensemble(dernier(rat->gauche),(intptr_t) position)){
+      ajouter_elements(e,premier(rat->droit));
+    }
+    trouver_suivant(rat->gauche,e, position);
+    trouver_suivant(rat->droit,e, position);
+    break;
+  case STAR:
+        
+    if(est_dans_l_ensemble(dernier(fils(rat)), (intptr_t)position)) 
+      {
+	ajouter_elements(e,premier(fils(rat)));
+      }      
+    trouver_suivant(rat->gauche,e, position);
+   break;
+    
+  }
+}
+
+Ensemble *suivant(Rationnel *rat, int position)
+{
+   Ensemble* e = creer_ensemble(NULL, NULL, NULL);
+   trouver_suivant(rat,e,position);
+   return e;
+}
+
 char get_lettre_in_position(Rationnel * rat, int pos) {
-  //on est sur la lettre
+  /** on est sur la lettre**/
   if(get_etiquette(rat) == LETTRE && pos == rat->position_min){
     return get_lettre(rat);
   }
-  //concat ou union
-  else if ((get_etiquette(rat) == CONCAT)
-	   || (get_etiquette(rat) == UNION)) {
+  /** Si on arrive sur une concaténation ou une union**/
+  else if ((get_etiquette(rat) == CONCAT) || (get_etiquette(rat) == UNION)) {
     if (pos <= fils_gauche(rat)->position_max ) {
       return get_lettre_in_position(fils_gauche(rat), pos);
     }
@@ -609,17 +491,16 @@ char get_lettre_in_position(Rationnel * rat, int pos) {
       return get_lettre_in_position(fils_droit(rat), pos);
     }
   }
-  //star
+  /** finalement le cas de l'étoile **/
   else if (get_etiquette(rat) == STAR) {
     if (fils(rat) != NULL) {
       return get_lettre_in_position(fils(rat), pos);
     }
   }
-  //fin non void
-  return '9';
+  return -1;
 }
 
-//nath
+
 Automate *Glushkov(Rationnel *rat){
     
     Automate* a = creer_automate();
@@ -637,10 +518,8 @@ Automate *Glushkov(Rationnel *rat){
     
     //on rajoute les états premiers 
     Ensemble* prems = premier(rat);
-    print_ensemble(prems,NULL);  //TMP
-    for (it = premier_iterateur_ensemble(prems) ;         !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
+    for (it = premier_iterateur_ensemble(prems) ; !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
         ajouter_etat(a,get_element(it));
-	//	c = get_lettre (get_rationnel(rat,get_element(it)));
         c = get_lettre_in_position(rat, get_element(it));
 	fprintf(stderr,"%c\n",c);
         ajouter_transition(a,0,c,get_element(it));
@@ -650,11 +529,10 @@ Automate *Glushkov(Rationnel *rat){
     
     for (int i=1; i<= nb_positions; i++){
         Ensemble* suivnt=suivant (rat,i);
+	print_ensemble(suivnt,NULL);
         
-        for (it = premier_iterateur_ensemble(suivnt);
-             !iterateur_est_vide(it); it= iterateur_suivant_ensemble(it)) {
+        for (it = premier_iterateur_ensemble(suivnt);!iterateur_est_vide(it); it= iterateur_suivant_ensemble(it)) {
             ajouter_etat(a,i);
-	    //c = get_lettre (get_rationnel(rat,get_element(it)));
             c = get_lettre_in_position(rat,get_element(it));
             ajouter_transition(a,i,c,get_element(it));
         }
@@ -667,7 +545,6 @@ Automate *Glushkov(Rationnel *rat){
     for (it = premier_iterateur_ensemble(lst); !iterateur_est_vide(it); it = iterateur_suivant_ensemble(it))
     {ajouter_etat_final(a, get_element(it));
     }
-    //liberer_ensemble(lst);
     return a;
 }
     
@@ -695,6 +572,8 @@ bool meme_langage (const char *expr1, const char* expr2)
   Automate * a2= Glushkov(r2);
   Automate * am2 = creer_automate_minimal(a2);
 
+  //COMPARAISON A L'AUTOMATE VIDE A REFAIRE PROPREMENT. NON FONCTIONNEL ICI.
+  
   //on test si inter(complementaire(am1),am2) = ensemble vide soit :  am2 inclus dans am1
   Automate * intersection = creer_intersection_des_automates (complementaire(am1),am2);
   if(get_etats(intersection) != NULL){
@@ -705,7 +584,7 @@ bool meme_langage (const char *expr1, const char* expr2)
   if(get_etats(intersection2) != NULL){
     return false;
   }
-  
+
   //si la double inclusion est correcte, alors il s'agit du meme langage
   return true;
 }
