@@ -637,7 +637,6 @@ Automate *Glushkov(Rationnel *rat){
     
     //on rajoute les états premiers 
     Ensemble* prems = premier(rat);
-    print_ensemble(prems,NULL);  //TMP
     for (it = premier_iterateur_ensemble(prems) ;         !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
         ajouter_etat(a,get_element(it));
 	//	c = get_lettre (get_rationnel(rat,get_element(it)));
@@ -688,21 +687,29 @@ bool meme_langage (const char *expr1, const char* expr2)
 {
   //pour chaque expression, on la change en rationnel, qui est alors tranformée en automate que l'on minimise
   Rationnel * r1 = expression_to_rationnel(expr1);
-  Automate * a1= Glushkov(r1);
-  Automate * am1 = creer_automate_minimal(a1);
-  
   Rationnel * r2 = expression_to_rationnel(expr2);
+  
+  Automate * a1= Glushkov(r1);
   Automate * a2= Glushkov(r2);
+
+  //si l'ensemble des alphabets est différent, il ne peut s'agir du meme langage
+  if (comparer_ensemble(get_alphabet (a1),get_alphabet (a2)) != 0){
+    return false;
+  }
+  
+  Automate * am1 = creer_automate_minimal(a1);
   Automate * am2 = creer_automate_minimal(a2);
 
   //on test si inter(complementaire(am1),am2) = ensemble vide soit :  am2 inclus dans am1
   Automate * intersection = creer_intersection_des_automates (complementaire(am1),am2);
+  print_automate(intersection);
   if(get_etats(intersection) != NULL){
     return false;
   }
   //on test si inter(complementaire(am2),am1) = ensemble vide soit : am1 inclus dans am2
-  Automate * intersection2 = creer_intersection_des_automates (complementaire(am2),am1);
-  if(get_etats(intersection2) != NULL){
+  intersection = creer_intersection_des_automates (complementaire(am2),am1);
+  print_automate(intersection);
+  if(get_etats(intersection) != NULL){
     return false;
   }
   
