@@ -610,7 +610,7 @@ Systeme creer_systeme(Automate * automate){
 /*
  * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
 */
-bvoid ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
+void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
   ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
 }
 
@@ -618,15 +618,16 @@ bvoid ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
 
 Systeme systeme(Automate *automate)
 {
+  //Systeme des transition entrantes
   Automate * minimal = creer_automate_minimal(automate);
-  Systeme s =  creer_systeme(a);
+  Systeme s =  creer_systeme(minimal);
   
   //remplissage de la matrice en fonction des transition : les n premières colonnes.
-  pour_toute_transition (a, ajoute_dans_systeme, (void *)s);
+  pour_toute_transition (minimal, ajoute_dans_systeme, (void *)s);
   
   //remplissage de la dernière colonne correspondant à ε
-  int size = taille_ensemble(get_etats(a));
-  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(a));
+  int size = taille_ensemble(get_etats(minimal));
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(minimal));
   while (!iterateur_ensemble_est_vide(ens_i)){
     s[get_element(ens_i)][size] = rationnel( EPSILON,0,0,0,NULL,NULL,NULL,NULL);
     ens_i = iterateur_suivant_ensemble(ens_i);
@@ -662,9 +663,30 @@ Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int 
    A_FAIRE_RETURN(NULL);
 }
 
+//-----
+
+int sont_egaux(Rationnel** r1, Rationnel ** r2, int n){
+  for(int i = 0; i < n ; i++){
+    if(strcmp(rationnel_to_expression(r1),rationnel_to_expression(r2)) != 0){
+      return 0;
+    }
+  }
+  return 1;
+}
+
+//-----
+  
 Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationnel **valeur_variable, int n)
 {
-   A_FAIRE_RETURN(NULL);
+  //Si on est dans le cas ou on essait de substituer a lui meme
+  if(sont_egaux(ligne,valeur_variable,n)){
+    return resoudre_variable_arden(ligne,numero_variable,n);
+  }
+  //transformer valeur_variable
+  if(strcmp(rationnel_to_expression(valeur_variable[numero_variable]),"∅") != 0){
+    valeur_variable = resoudre_variable_arden(valeur_variable,numero_variable,n);
+  }
+  return ligne;
 }
 
 Systeme resoudre_systeme(Systeme systeme, int n)
