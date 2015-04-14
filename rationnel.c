@@ -610,7 +610,7 @@ Systeme creer_systeme(Automate * automate){
 /*
  * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
 */
-void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
+bvoid ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
   ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
 }
 
@@ -618,14 +618,15 @@ void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
 
 Systeme systeme(Automate *automate)
 {
-  Systeme s =  creer_systeme(automate);
+  Automate * minimal = creer_automate_minimal(automate);
+  Systeme s =  creer_systeme(a);
   
   //remplissage de la matrice en fonction des transition : les n premières colonnes.
-  pour_toute_transition (automate, ajoute_dans_systeme, (void *)s);
+  pour_toute_transition (a, ajoute_dans_systeme, (void *)s);
   
   //remplissage de la dernière colonne correspondant à ε
-  int size = taille_ensemble(get_etats(automate));
-  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(automate));
+  int size = taille_ensemble(get_etats(a));
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(a));
   while (!iterateur_ensemble_est_vide(ens_i)){
     s[get_element(ens_i)][size] = rationnel( EPSILON,0,0,0,NULL,NULL,NULL,NULL);
     ens_i = iterateur_suivant_ensemble(ens_i);
