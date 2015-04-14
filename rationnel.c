@@ -680,6 +680,7 @@ void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
 
 Systeme systeme(Automate *automate)
 {
+  //Systeme des transition entrantes
   Automate * minimal = creer_automate_minimal(automate);
   Systeme s =  creer_systeme(minimal);
   
@@ -730,9 +731,30 @@ Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int 
   A_FAIRE_RETURN(NULL);
 }
 
+//-----
+
+int sont_egaux(Rationnel** r1, Rationnel ** r2, int n){
+  for(int i = 0; i < n ; i++){
+    if(strcmp(rationnel_to_expression(r1),rationnel_to_expression(r2)) != 0){
+      return 0;
+    }
+  }
+  return 1;
+}
+
+//-----
+  
 Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationnel **valeur_variable, int n)
 {
-   A_FAIRE_RETURN(NULL);
+  //Si on est dans le cas ou on essait de substituer a lui meme
+  if(sont_egaux(ligne,valeur_variable,n)){
+    return resoudre_variable_arden(ligne,numero_variable,n);
+  }
+  //transformer valeur_variable
+  if(strcmp(rationnel_to_expression(valeur_variable[numero_variable]),"∅") != 0){
+    valeur_variable = resoudre_variable_arden(valeur_variable,numero_variable,n);
+  }
+  return ligne;
 }
 
 Systeme resoudre_systeme(Systeme systeme, int n)
