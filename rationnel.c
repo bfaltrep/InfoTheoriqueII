@@ -153,6 +153,68 @@ Rationnel *pere(Rationnel* rat)
    return rat->pere;
 }
 
+char* rationnel_to_expression_rec(Rationnel* rat,char* Expression)
+{
+   if (rat == NULL)
+    {
+      sprintf(Expression,"%s%s",Expression,"∅");         
+
+      return Expression;
+    }
+   
+  switch(get_etiquette(rat))
+    {
+    case EPSILON:
+      sprintf(Expression,"%s%s",Expression,"ε");         
+      break;
+         
+    case LETTRE:
+      sprintf(Expression,"%s%c",Expression,get_lettre(rat));  
+      break;
+
+    case UNION:
+      sprintf(Expression,"%s%s",Expression,"(");
+      rationnel_to_expression_rec(fils_gauche(rat),Expression);
+
+      sprintf(Expression,"%s%s",Expression,"+");
+      rationnel_to_expression_rec(fils_droit(rat),Expression);
+
+      sprintf(Expression,"%s%s",Expression,")");   
+      break;
+
+    case CONCAT:
+      sprintf(Expression,"%s%s",Expression,"(");
+
+      rationnel_to_expression_rec(fils_gauche(rat),Expression);
+	 
+      sprintf(Expression,"%s%s",Expression,".");
+	 
+      rationnel_to_expression_rec(fils_droit(rat),Expression);
+	 
+      sprintf(Expression,"%s%s",Expression,")");
+
+      break;
+
+    case STAR:
+	
+      sprintf(Expression,"%s%s",Expression,"(");
+
+      rationnel_to_expression_rec(fils(rat),Expression);
+      sprintf(Expression,"%s%s",Expression,")*");
+
+         break;
+
+      default:
+         assert(false);
+         break;
+   }
+  return Expression;
+}
+
+char* rationnel_to_expression(Rationnel* rat){
+  return rationnel_to_expression_rec(rat,"");
+}
+
 void print_rationnel(Rationnel* rat)
 {
    if (rat == NULL)
@@ -610,7 +672,7 @@ Systeme creer_systeme(Automate * automate){
 /*
  * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
 */
-bvoid ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
+void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
   ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
 }
 
@@ -619,14 +681,14 @@ bvoid ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
 Systeme systeme(Automate *automate)
 {
   Automate * minimal = creer_automate_minimal(automate);
-  Systeme s =  creer_systeme(a);
+  Systeme s =  creer_systeme(minimal);
   
   //remplissage de la matrice en fonction des transition : les n premières colonnes.
-  pour_toute_transition (a, ajoute_dans_systeme, (void *)s);
+  pour_toute_transition (minimal, ajoute_dans_systeme, (void *)s);
   
   //remplissage de la dernière colonne correspondant à ε
-  int size = taille_ensemble(get_etats(a));
-  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(a));
+  int size = taille_ensemble(get_etats(minimal));
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(minimal));
   while (!iterateur_ensemble_est_vide(ens_i)){
     s[get_element(ens_i)][size] = rationnel( EPSILON,0,0,0,NULL,NULL,NULL,NULL);
     ens_i = iterateur_suivant_ensemble(ens_i);
@@ -658,8 +720,14 @@ void print_systeme(Systeme systeme, int n)
 /*     PARTIE 2     */
 
 Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int n)
-{
-   A_FAIRE_RETURN(NULL);
+{/**
+  //get
+  for (int i = 0; i < n; i++){
+    if (i==numero_variable){
+      break;
+    }
+ **/
+  A_FAIRE_RETURN(NULL);
 }
 
 Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationnel **valeur_variable, int n)

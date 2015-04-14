@@ -91,7 +91,8 @@ int test_bere (void){
 
   Rationnel * tmp = expression_to_rationnel("(a.a)*.(b+c*).a.b*");
   numeroter_rationnel(tmp);
-  Ensemble * e = suivant(tmp, 3);
+  
+  /**Ensemble * e = suivant(tmp, 3);
   print_ensemble(e,NULL);
        
   TEST(
@@ -102,7 +103,7 @@ int test_bere (void){
        && !est_dans_l_ensemble(e, 4)
        && est_dans_l_ensemble(e, 5)
        && !est_dans_l_ensemble(e, 6)
-       , resultat);
+       , resultat);**/
   /**
      Rationnel * rat;
   rat = expression_to_rationnel("(a.a)*.(b+c*).a.b*");
@@ -235,6 +236,7 @@ int test_bere (void){
   liberer_ensemble(dern_r1);
   liberer_ensemble(dern_r2);
   */
+  
   destroy_rationnel(r1);
   destroy_rationnel(r2);
   return resultat;
