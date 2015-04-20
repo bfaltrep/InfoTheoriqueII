@@ -611,7 +611,14 @@ Systeme creer_systeme(Automate * automate){
  * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
 */
 void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
-  ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
+  //cas ou il y a plusieurs lettres allant de origine a fin
+  if(((Systeme)data)[fin][origine] != NULL){
+    ((Systeme)data)[fin][origine] = Union(((Systeme)data)[fin][origine],rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL));
+  }
+  //cas simple
+  else{
+    ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
+  }
 }
 
 // ------------------------------
@@ -637,7 +644,7 @@ Systeme systeme(Automate *automate)
 }
 
 void print_ligne(Rationnel **ligne, int n)
-{
+ {
   for (int j = 0; j <=n; j++)
     {
       print_rationnel(ligne[j]);
