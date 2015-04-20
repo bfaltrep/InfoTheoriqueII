@@ -88,22 +88,8 @@ int test_bere (void){
   
   Rationnel * r1 = expression_to_rationnel("(a+b)*.a");
   Rationnel * r2 = expression_to_rationnel("a.(a+b)*");
-
-  Rationnel * tmp = expression_to_rationnel("(a.a)*.(b+c*).a.b*");
-  numeroter_rationnel(tmp);
-  Ensemble * e = suivant(tmp, 3);
-  print_ensemble(e,NULL);
-       
-  TEST(
-       1
-       && !est_dans_l_ensemble(e, 1)
-       && !est_dans_l_ensemble(e, 2)
-       && !est_dans_l_ensemble(e, 3)
-       && !est_dans_l_ensemble(e, 4)
-       && est_dans_l_ensemble(e, 5)
-       && !est_dans_l_ensemble(e, 6)
-       , resultat);
-  /**
+  
+  /*
      Rationnel * rat;
   rat = expression_to_rationnel("(a.a)*.(b+c*).a.b*");
   numeroter_rationnel(rat);
@@ -122,13 +108,15 @@ int test_bere (void){
        , resultat);
 
 
-     **/
+     */
   
   /*
   //test numeroter
   numeroter_rationnel(r1);
   numeroter_rationnel(r2);
-*/
+  */
+
+  
   /*
     printf(" --- test numeroter --- \n\n");
     printf(" r1 : (a+b)*.a\n");
@@ -176,8 +164,12 @@ int test_bere (void){
        , resultat);
     */
   //test automates
-  /*
-  Automate * a1 = creer_automate();
+
+  /*a */
+  Automate * a1 = Glushkov(r1);
+  Automate * a2 = Glushkov(r2);
+  
+  Automate * a3 = creer_automate();
   ajouter_transition (a1,0,'a',1);
   ajouter_transition (a1,0,'b',2);
   ajouter_transition (a1,1,'a',2);
@@ -186,13 +178,13 @@ int test_bere (void){
   ajouter_etat_final (a1,1);
   ajouter_etat_final (a1,2);
 
-  Automate * a2 = creer_automate();
+  Automate * a4 = creer_automate();
   ajouter_transition (a2,0,'b',1);
   ajouter_transition (a2,0,'a',0);
   ajouter_etat_initial (a2,0);
   ajouter_etat_final (a2,1);
   ajouter_etat_final (a2,0);
-  */
+
   /*
     printf("\n --- test complementaire --- \n\n");
   
@@ -210,31 +202,43 @@ int test_bere (void){
 
   //test Systeme
 
-  //Systeme s1 = systeme(a1);
-  //Systeme s2 = systeme(a2);
-
+  Systeme s1 = systeme(a1);
+  Systeme s2 = systeme(a2);
   /*
-    fprintf(stderr,"\ns1 \n\n");
-    print_systeme (s1,taille_ensemble(get_etats (a1)));
+  Systeme s3 = systeme(a3);
+  Systeme s4 = systeme(a4);
+  */
+  
+  fprintf(stderr,"\ns1 \n\n");
+  print_systeme (s1,taille_ensemble(get_etats (a1)));
   
 
-    fprintf(stderr,"\ns2 \n\n");
-    print_systeme (s2,taille_ensemble(get_etats (a2)));
-  */
+  fprintf(stderr,"\ns2 \n\n");
+  print_systeme (s2,taille_ensemble(get_etats (a2)));
+    
+  fprintf(stderr,"\ns3 \n\n");
+  print_systeme (s1,taille_ensemble(get_etats (a3)));
+  
+
+  fprintf(stderr,"\ns4 \n\n");
+  print_systeme (s2,taille_ensemble(get_etats (a4)));
   
   //nettoyage final
   
-  //destroy_systeme(s1,taille_ensemble(get_etats (a1)));
-  //destroy_systeme(s2,taille_ensemble(get_etats (a2)));
+  destroy_systeme(s1,taille_ensemble(get_etats (a1)));
+  destroy_systeme(s2,taille_ensemble(get_etats (a2)));
   
-  //liberer_automate (a1);
-  //liberer_automate (a2);
+  liberer_automate (a1);
+  liberer_automate (a2);
+  liberer_automate (a3);
+  liberer_automate (a4);
   /*
   liberer_ensemble(prem_r1);
   liberer_ensemble(prem_r2);
   liberer_ensemble(dern_r1);
   liberer_ensemble(dern_r2);
   */
+  
   destroy_rationnel(r1);
   destroy_rationnel(r2);
   return resultat;

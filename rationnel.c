@@ -662,39 +662,55 @@ Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int 
 {
    A_FAIRE_RETURN(NULL);
 }
-
-//-----
-
-int sont_egaux(Rationnel** r1, Rationnel ** r2, int n){
-  for(int i = 0; i < n ; i++){
-    if(strcmp(rationnel_to_expression(r1),rationnel_to_expression(r2)) != 0){
-      return 0;
-    }
-  }
-  return 1;
-}
-
-//-----
   
 Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationnel **valeur_variable, int n)
 {
-  //Si on est dans le cas ou on essait de substituer a lui meme
-  if(sont_egaux(ligne,valeur_variable,n)){
-    return resoudre_variable_arden(ligne,numero_variable,n);
+  if (ligne[numero_variable] == NULL){
+    return ligne;
   }
-  //transformer valeur_variable
-  if(strcmp(rationnel_to_expression(valeur_variable[numero_variable]),"∅") != 0){
+  //applique arden si le rationnel a substituer est de la forme X = ∝X+β1 + β2 ...
+  if(valeur_variable[numero_variable] != NULL){
     valeur_variable = resoudre_variable_arden(valeur_variable,numero_variable,n);
+  }
+  int i = 0;
+  for(;i < n ;i++){
+    if(valeur_variable[i] != NULL){
+      ligne[i] = Concat(ligne[numero_variable],valeur_variable[i]);
+    }
   }
   return ligne;
 }
 
 Systeme resoudre_systeme(Systeme systeme, int n)
 {
-   A_FAIRE_RETURN(NULL);
+  for(int i = 0; i < n ; i++){
+    //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état
+    for(int j = 0 ; j < n ; j++){
+      if(systeme[i][j] != NULL){
+	systeme[i] =  substituer_variable(systeme[i], j,systeme[j],n);
+      }
+    }
+  }
+  return systeme;
 }
 
 Rationnel *Arden(Automate *automate)
 {
-   A_FAIRE_RETURN(NULL);
+  //on minimise pour s'assurer que le systeme sera le plus simple possible
+  Automate * minimal = creer_automate_minimal(automate);
+  int size = taille_ensemble(get_etats(minimal));
+  
+  //on créer le système puis on le résout
+  Systeme s = systeme(minimal);  
+  s = resoudre_systeme(s,size);
+
+  //on peut alors faire l'union des finaux
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_finaux(minimal));
+  Rationnel * res = s[get_element(ens_i)][size];
+  while (!iterateur_ensemble_est_vide(ens_i)){
+    res = Union(res,s[get_element(ens_i)][size]);
+    
+    ens_i = iterateur_suivant_ensemble(ens_i);
+  }
+  return res;
 }
