@@ -743,7 +743,7 @@ Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationne
   if (ligne[numero_variable] == NULL){
     return ligne;
   }
-  //applique arden si le rationnel a substituer est de la forme X = ∝X+β1 + β2 ...
+  //applique arden si le rationnel a substituer est de la forme X = ∝X+ ...
   if(valeur_variable[numero_variable] != NULL){
     valeur_variable = resoudre_variable_arden(valeur_variable,numero_variable,n);
   }
@@ -759,7 +759,7 @@ Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationne
 Systeme resoudre_systeme(Systeme systeme, int n)
 {
   for(int i = 0; i < n ; i++){
-    //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état
+    //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des états
     for(int j = 0 ; j < n ; j++){
       if(systeme[i][j] != NULL){
 	systeme[i] =  substituer_variable(systeme[i], j,systeme[j],n);
