@@ -88,6 +88,7 @@ int test_bere (void){
   
   Rationnel * r1 = expression_to_rationnel("(a+b)*.a");
   Rationnel * r2 = expression_to_rationnel("a.(a+b)*");
+<<<<<<< HEAD
 
   Rationnel * tmp = expression_to_rationnel("(a.a)*.(b+c*).a.b*");
   numeroter_rationnel(tmp);
@@ -104,7 +105,30 @@ int test_bere (void){
        && est_dans_l_ensemble(e, 5)
        && !est_dans_l_ensemble(e, 6)
        , resultat);**/
+  /**
+=======
+  
+  /*
+>>>>>>> f7903f88173d9174d38265119d20fc64c175cd18
+     Rationnel * rat;
+  rat = expression_to_rationnel("(a.a)*.(b+c*).a.b*");
+  numeroter_rationnel(rat);
+  Automate * automate = Glushkov(rat);
+  print_automate(automate);
+  TEST(
+       1
+       && le_mot_est_reconnu(automate, "ab")
+       && le_mot_est_reconnu(automate, "a")
+       && ! le_mot_est_reconnu(automate, "aa")
+       && ! le_mot_est_reconnu(automate, "")
+       && ! le_mot_est_reconnu(automate, "aaaabcc")
+       && ! le_mot_est_reconnu(automate, "aaaabccabbb")
+       && le_mot_est_reconnu(automate, "aaaaccabbb")
+       && ! le_mot_est_reconnu(automate, "aaaabccaabbb")
+       , resultat);
 
+
+     */
   
   /*
   //test numeroter
