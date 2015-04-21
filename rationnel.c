@@ -728,14 +728,19 @@ void print_systeme(Systeme systeme, int n)
 /*     PARTIE 2     */
 
 Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int n)
-{/**
-  //get
-  for (int i = 0; i < n; i++){
-    if (i==numero_variable){
-      break;
+{
+  Rationnel* tmp = Star(ligne[numero_variable]);
+  for (int i=0; i< n; i++){
+    if (i != numero_variable){
+      if (ligne [i] == NULL)
+	ligne[i]=tmp;
+      ligne [i] = Concat(tmp,ligne [i]);
     }
- **/
-  A_FAIRE_RETURN(NULL);
+    else
+      ligne[i] = NULL;
+  }
+  return ligne;
+			 
 }
   
 Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationnel **valeur_variable, int n)
