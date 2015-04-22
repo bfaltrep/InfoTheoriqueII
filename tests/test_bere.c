@@ -92,29 +92,56 @@ int test_bere (void){
   //Systeme s2 = systeme(a2);
 
   Systeme s3 = systeme(a3);
-  //print_systeme(s3,taille_ensemble(get_etats (creer_automate_minimal(a3))));
+  print_automate(creer_automate_minimal(a3));
+  print_systeme(s3,taille_ensemble(get_etats (creer_automate_minimal(a3))));
    TEST(
 	 1
-	 && s1[0][0] == NULL
-	 && s1[0][1] == NULL
-	 && s1[0][2] == NULL
-	 && s1[0][3] == NULL
-	 && s1[0][4] == NULL
-
+	 && s3[0][0] == NULL
+	 && s3[0][1] == NULL
+	 && s3[0][2] == NULL
+	 && s3[0][3] == NULL
+	 && s3[0][4] == NULL
+	 && contient_mot_vide (s3[0][5])
+	 
 	 && get_lettre (s3[1][0]) == 'a'
-	 && s1[1][1] == NULL
-	 && s1[1][2] == NULL
-	 && s1[1][3] == NULL
-	 && s1[1][4] == NULL
-
+	 && s3[1][1] == NULL
+	 && s3[1][2] == NULL
+	 && s3[1][3] == NULL
+	 && s3[1][4] == NULL
+	 && s3[1][5] == NULL
+	 
 	 && get_lettre (s3[2][0]) == 'b'
-	 && get_lettre (s3[2][0]) == 'a'
+	 && get_lettre (s3[2][1]) == 'a'
+	 && get_lettre (s3[2][2]) == 'a'
+	 && s3[2][3] == NULL
+	 && s3[2][4] == NULL
+	 && s3[2][5] == NULL
+	 
+	 && s3[3][0] == NULL
+	 && s3[3][1] == NULL
+	 && get_lettre (s3[3][2]) == 'b'
+	 && get_etiquette (s3[3][3]) == UNION
+	 && ((get_lettre (fils_gauche (s3[3][3])) == 'a'
+	  && get_lettre (fils_droit (s3[3][3])) == 'b')
+	 || (get_lettre (fils_droit (s3[3][3])) == 'a'
+	     && get_lettre (fils_gauche (s3[3][3])) == 'b' ))
+	 && s3[3][4] == NULL
+	 && s3[3][5] == NULL
 
-	 //&& contient_mot_vide (s3[0][2])
-
-
+	 && s3[4][0] == NULL
+	 && get_lettre (s3[4][1]) == 'b'
+	 && s3[4][2] == NULL
+	 && s3[4][3] == NULL
+	 && ((get_lettre (fils_gauche (s3[4][4])) == 'a'
+	  && get_lettre (fils_droit (s3[4][4])) == 'b')
+	 || (get_lettre (fils_droit (s3[4][4])) == 'a'
+	     && get_lettre (fils_gauche (s3[4][4])) == 'b' ))
+	 && s3[4][5] == NULL
 	 , resultat);
-  
+
+
+
+   
   Rationnel * ras1 = Arden (a1);
   print_rationnel(ras1);
   Rationnel * ras3 = Arden (a3);

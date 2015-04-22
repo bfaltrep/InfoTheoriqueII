@@ -769,10 +769,11 @@ Systeme resoudre_systeme(Systeme systeme, int n)
   for(int i = 0; i < n ; i++){
     //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des états
     for(int j = 0 ; j < n ; j++){
+      if(i == j && systeme[i] != NULL){
+	resoudre_variable_arden(systeme[i],i,n);
+      }
       if(systeme[i][j] != NULL){
-	systeme[i] =
-	  substituer_variable(systeme[i], j,
-			      systeme[j],n);
+	systeme[i] = substituer_variable(systeme[i], j, systeme[j],n);
       }
     }
   }
