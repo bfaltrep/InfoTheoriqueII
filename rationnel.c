@@ -219,39 +219,39 @@ void print_rationnel(Rationnel* rat)
 {
    if (rat == NULL)
    {
-     fprintf(stderr,"∅");
+     printf("∅");
       return;
    }
    switch(get_etiquette(rat))
    {
       case EPSILON:
-         fprintf(stderr,"ε");         
+         printf("ε");         
          break;
          
       case LETTRE:
-         fprintf(stderr,"%c", get_lettre(rat));
+         printf("%c", get_lettre(rat));
          break;
 
       case UNION:
-         fprintf(stderr,"(");
+         printf("(");
          print_rationnel(fils_gauche(rat));
-         fprintf(stderr," + ");
+         printf(" + ");
          print_rationnel(fils_droit(rat));
-         fprintf(stderr,")");         
+         printf(")");         
          break;
 
       case CONCAT:
-         fprintf(stderr,"[");
+         printf("[");
          print_rationnel(fils_gauche(rat));
-         fprintf(stderr," . ");
+         printf(" . ");
          print_rationnel(fils_droit(rat));
-         fprintf(stderr,"]");         
+         printf("]");         
          break;
 
       case STAR:
-         fprintf(stderr,"{");
+         printf("{");
          print_rationnel(fils(rat));
-         fprintf(stderr,"}*");         
+         printf("}*");         
          break;
 
       default:
@@ -667,16 +667,16 @@ void print_ligne(Rationnel **ligne, int n)
     {
       print_rationnel(ligne[j]);
       if (j<n)
-	fprintf(stderr,"X%d\t+\t", j);
+	printf("X%d\t+\t", j);
     }
-  fprintf(stderr,"\n");
+  printf("\n");
 }
 
 void print_systeme(Systeme systeme, int n)
 {
   for (int i = 0; i < n; i++)
     {
-      fprintf(stderr,"X%d\t= ", i);
+      printf("X%d\t= ", i);
       print_ligne(systeme[i], n);
     }
 }
@@ -770,7 +770,9 @@ Systeme resoudre_systeme(Systeme systeme, int n)
     //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des états
     for(int j = 0 ; j < n ; j++){
       if(systeme[i][j] != NULL){
-	systeme[i] =  substituer_variable(systeme[i], j,systeme[j],n);
+	systeme[i] =
+	  substituer_variable(systeme[i], j,
+			      systeme[j],n);
       }
     }
   }
@@ -787,13 +789,19 @@ Rationnel *Arden(Automate *automate)
   Systeme s = systeme(minimal);  
   s = resoudre_systeme(s,size);
 
+  
+  Rationnel * res =NULL;
+  
   //on peut alors faire l'union des finaux
   Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_finaux(minimal));
-  Rationnel * res = s[get_element(ens_i)][size];
-  while (!iterateur_ensemble_est_vide(ens_i)){
-    res = Union(res,s[get_element(ens_i)][size]);
+  if(!iterateur_ensemble_est_vide(ens_i)){
+
+    res = s[((int)get_element(ens_i))][size];
     
-    ens_i = iterateur_suivant_ensemble(ens_i);
+    while (!iterateur_ensemble_est_vide(ens_i)){
+      res = Union(res,s[((int)get_element(ens_i))][size]);
+      ens_i = iterateur_suivant_ensemble(ens_i);
+    }
   }
   return res;
 }
