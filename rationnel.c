@@ -219,40 +219,39 @@ void print_rationnel(Rationnel* rat)
 {
    if (rat == NULL)
    {
-      printf("∅");
+     fprintf(stderr,"∅");
       return;
    }
-   
    switch(get_etiquette(rat))
    {
       case EPSILON:
-         printf("ε");         
+         fprintf(stderr,"ε");         
          break;
          
       case LETTRE:
-         printf("%c", get_lettre(rat));
+         fprintf(stderr,"%c", get_lettre(rat));
          break;
 
       case UNION:
-         printf("(");
+         fprintf(stderr,"(");
          print_rationnel(fils_gauche(rat));
-         printf(" + ");
+         fprintf(stderr," + ");
          print_rationnel(fils_droit(rat));
-         printf(")");         
+         fprintf(stderr,")");         
          break;
 
       case CONCAT:
-         printf("[");
+         fprintf(stderr,"[");
          print_rationnel(fils_gauche(rat));
-         printf(" . ");
+         fprintf(stderr," . ");
          print_rationnel(fils_droit(rat));
-         printf("]");         
+         fprintf(stderr,"]");         
          break;
 
       case STAR:
-         printf("{");
+         fprintf(stderr,"{");
          print_rationnel(fils(rat));
-         printf("}*");         
+         fprintf(stderr,"}*");         
          break;
 
       default:
@@ -657,30 +656,54 @@ bool meme_langage (const char *expr1, const char* expr2)
   return true;
 }
 
+
+
+
+
+
+void print_ligne(Rationnel **ligne, int n)
+ {
+  for (int j = 0; j <=n; j++)
+    {
+      print_rationnel(ligne[j]);
+      if (j<n)
+	fprintf(stderr,"X%d\t+\t", j);
+    }
+  fprintf(stderr,"\n");
+}
+
+void print_systeme(Systeme systeme, int n)
+{
+  for (int i = 0; i < n; i++)
+    {
+      fprintf(stderr,"X%d\t= ", i);
+      print_ligne(systeme[i], n);
+    }
+}
+
 // ---------- fonctions locales pour systeme ----------
 
-Systeme creer_systeme(Automate * automate){
-  int nbEtats = taille_ensemble(get_etats (automate));
-  Systeme s = malloc(sizeof(Rationnel **) * nbEtats);
-  for(int i = 0 ; i < nbEtats ; i++){
+Systeme creer_systeme(Automate * automate, int size){
+  
+  Systeme s = malloc(sizeof(Rationnel **) * size);
+  
+  for(int i = 0 ; i < size ; i++){
     //toutes les cases de la matrice sont initialisées à ∅
-    s[i] = calloc(nbEtats+1,sizeof(Rationnel *));
+    s[i] = calloc(size+1,sizeof(Rationnel *));
   }
   return s;
 }
 
-/*
- * \brief Pour les informations d'une transition données en paramètre, ajoute dans le Système, dernier paramètre, le rationnel associé
-*/
 void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
+ 
   //cas ou il y a plusieurs lettres allant de origine a fin
   if(((Systeme)data)[fin][origine] != NULL){
-    ((Systeme)data)[fin][origine] = Union(((Systeme)data)[fin][origine],rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL));
+    ((Systeme)data)[fin][origine] = Union(((Systeme)data)[fin][origine],Lettre(lettre));
   }
   //cas simple
   else{
-    ((Systeme)data)[fin][origine] = rationnel(LETTRE,lettre,1,1,NULL,NULL,NULL,NULL);
-  }
+    ((Systeme)data)[fin][origine] = Lettre(lettre);
+    }
 }
 
 // ------------------------------
@@ -689,40 +712,20 @@ Systeme systeme(Automate *automate)
 {
   //Systeme des transition entrantes
   Automate * minimal = creer_automate_minimal(automate);
-  Systeme s =  creer_systeme(minimal);
+  int size = taille_ensemble(get_etats(minimal));
+  Systeme s = creer_systeme(minimal, size);
   
   //remplissage de la matrice en fonction des transition : les n premières colonnes.
   pour_toute_transition (minimal, ajoute_dans_systeme, (void *)s);
   
-  //remplissage de la dernière colonne correspondant à ε
-  int size = taille_ensemble(get_etats(minimal));
+  //remplissage de la dernière colonne : ε ou NULL, à la création du systeme.
+
   Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(minimal));
   while (!iterateur_ensemble_est_vide(ens_i)){
-    s[get_element(ens_i)][size] = rationnel( EPSILON,0,0,0,NULL,NULL,NULL,NULL);
+    s[((int)get_element(ens_i))][size] = Epsilon();
     ens_i = iterateur_suivant_ensemble(ens_i);
   }
-  
   return s;
-}
-
-void print_ligne(Rationnel **ligne, int n)
- {
-  for (int j = 0; j <=n; j++)
-    {
-      print_rationnel(ligne[j]);
-      if (j<n)
-	printf("X%d\t+\t", j);
-    }
-  printf("\n");
-}
-
-void print_systeme(Systeme systeme, int n)
-{
-  for (int i = 0; i <= n-1; i++)
-    {
-      printf("X%d\t= ", i);
-      print_ligne(systeme[i], n);
-    }
 }
 
 /*     PARTIE 2     */
