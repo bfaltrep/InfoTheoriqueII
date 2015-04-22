@@ -83,7 +83,7 @@ int test_bere (void){
 	 1
 	 && get_lettre (s1[0][0]) == 'b'
 	 && get_lettre (s1[0][1]) == 'b'
-	 && contient_mot_vide (s1[0][2])
+	 && get_etiquette (s1[0][2]) == EPSILON
 	 && get_lettre (s1[1][0]) == 'a'
 	 && get_lettre (s1[1][1]) == 'a'
 	 && s1[1][2] == NULL
@@ -101,7 +101,7 @@ int test_bere (void){
 	 && s3[0][2] == NULL
 	 && s3[0][3] == NULL
 	 && s3[0][4] == NULL
-	 && contient_mot_vide (s3[0][5])
+	 && get_etiquette (s3[0][5]) == EPSILON
 	 
 	 && get_lettre (s3[1][0]) == 'a'
 	 && s3[1][1] == NULL
