@@ -383,30 +383,32 @@ void numeroter_rationnel(Rationnel *rat)
 */
 bool contient_mot_vide(Rationnel *rat)
 {
-  switch(get_etiquette(rat))
-    {
-    case EPSILON:
+  if(rat != NULL){
+    switch(get_etiquette(rat))
+      {
+      case EPSILON:
 
-    case STAR:
-      return true;
+      case STAR:
+	return true;
       
-      //pour exp = exp1 + exp 2 : si l'un ou l'autre est remplacable par epsilon, exp l'est aussi.
-    case UNION:
-      return contient_mot_vide(fils_gauche(rat)) || contient_mot_vide(fils_droit(rat));
+	//pour exp = exp1 + exp 2 : si l'un ou l'autre est remplacable par epsilon, exp l'est aussi.
+      case UNION:
+	return contient_mot_vide(fils_gauche(rat)) || contient_mot_vide(fils_droit(rat));
 
-      //pour exp = exp1.exp2, il faut que les deux soient remplacables par epsilon pour que exp le soit.
-    case CONCAT:
-      return contient_mot_vide(fils_gauche(rat)) && contient_mot_vide(fils_droit(rat));
+	//pour exp = exp1.exp2, il faut que les deux soient remplacables par epsilon pour que exp le soit.
+      case CONCAT:
+	return contient_mot_vide(fils_gauche(rat)) && contient_mot_vide(fils_droit(rat));
 
-      //une lettre n'est pas remplaçable par epsilon
-    case LETTRE:
-      return false;
+	//une lettre n'est pas remplaçable par epsilon
+      case LETTRE:
+	return false;
 
-    default:
-      assert(false);
-      break;
-    }
-    
+      default:
+	assert(false);
+	break;
+      }
+  }
+  return false;
 }
 
 void parcours_prem_dern(Rationnel *rat, Ensemble * ensemble, int prem_dern){
@@ -742,15 +744,17 @@ Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int 
     else
       ligne[i] = NULL;
   }
+  printf("\narden : \n");
+  for (int i=0; i<= n; i++){
+    print_rationnel(ligne[i]);
+    printf("\n");
+  }
   return ligne;
 			 
 }
   
 Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationnel **valeur_variable, int n)
 {
-  if (ligne[numero_variable] == NULL){
-    return ligne;
-  }
   //applique arden si le rationnel a substituer est de la forme X = ∝X+ ...
   if(valeur_variable[numero_variable] != NULL){
     valeur_variable = resoudre_variable_arden(valeur_variable,numero_variable,n);
@@ -761,19 +765,22 @@ Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationne
       ligne[i] = Concat(ligne[numero_variable],valeur_variable[i]);
     }
   }
+  if(valeur_variable[n] != NULL){
+    ligne[n] = Union(ligne[numero_variable],valeur_variable[i]);
+    }
   return ligne;
 }
 
 Systeme resoudre_systeme(Systeme systeme, int n)
 {
+
   for(int i = 0; i < n ; i++){
-    //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des états
+    //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des état
     for(int j = 0 ; j < n ; j++){
-      if(i == j && systeme[i] != NULL){
-	resoudre_variable_arden(systeme[i],i,n);
-      }
-      if(systeme[i][j] != NULL){
-	systeme[i] = substituer_variable(systeme[i], j, systeme[j],n);
+      //Si systeme[i][j] est null, aucune raison d'appliquer un changement
+      //Et si U contient epsilon, on ne peut appliquer arden ou résoudre => négation.
+      if(systeme[i][j] != NULL && ((i == j && !contient_mot_vide(systeme[i][j])) || i != j)){
+	systeme[i] = substituer_variable(systeme[i], j, systeme[j], n);
       }
     }
   }
@@ -787,22 +794,28 @@ Rationnel *Arden(Automate *automate)
   int size = taille_ensemble(get_etats(minimal));
   
   //on créer le système puis on le résout
-  Systeme s = systeme(minimal);  
+  Systeme s = systeme(minimal);
+
+  //TMP
+  printf("\n\n V1 : \n");
+  print_systeme(s,size);
+  
   s = resoudre_systeme(s,size);
 
+  //TMP
+  printf("\n\n V2 : \n");
+  print_systeme(s,size);
+  printf("\n\n\n");
   
   Rationnel * res =NULL;
   
   //on peut alors faire l'union des finaux
-  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_finaux(minimal));
-  if(!iterateur_ensemble_est_vide(ens_i)){
-
-    res = s[((int)get_element(ens_i))][size];
-    
-    while (!iterateur_ensemble_est_vide(ens_i)){
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_finaux(minimal));   
+  while (!iterateur_ensemble_est_vide(ens_i)){
+    if (s[((int)get_element(ens_i))][size] != NULL){
       res = Union(res,s[((int)get_element(ens_i))][size]);
-      ens_i = iterateur_suivant_ensemble(ens_i);
     }
+    ens_i = iterateur_suivant_ensemble(ens_i);
   }
   return res;
 }

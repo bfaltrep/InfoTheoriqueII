@@ -74,6 +74,20 @@ int test_bere (void){
   ajouter_etat_final (a3,3);
   ajouter_etat_final (a3,4);
 
+  /*
+  Automate * a4 = creer_automate();
+  ajouter_transition (a4,0,'b',1);
+  ajouter_transition (a4,0,'a',3);
+  ajouter_transition (a4,1,'b',0);
+  ajouter_transition (a4,3,'a',0);
+  ajouter_transition (a4,3,'b',2);
+  ajouter_transition (a4,1,'a',2);
+  ajouter_transition (a4,2,'a',3);
+  ajouter_transition (a4,2,'b',1);
+  ajouter_etat_initial (a4,0);
+  ajouter_etat_final (a4,2);
+  */
+  
   //test Systeme
 
   printf("\n --- test Systeme --- \n\n");
@@ -89,85 +103,74 @@ int test_bere (void){
 	 && s1[1][2] == NULL
 	 , resultat);
   
-  //Systeme s2 = systeme(a2);
-
   Systeme s3 = systeme(a3);
-  print_automate(creer_automate_minimal(a3));
-  print_systeme(s3,taille_ensemble(get_etats (creer_automate_minimal(a3))));
-   TEST(
-	 1
-	 && s3[0][0] == NULL
-	 && s3[0][1] == NULL
-	 && s3[0][2] == NULL
-	 && s3[0][3] == NULL
-	 && s3[0][4] == NULL
-	 && get_etiquette (s3[0][5]) == EPSILON
+  TEST(
+       1
+       && s3[0][0] == NULL
+       && s3[0][1] == NULL
+       && s3[0][2] == NULL
+       && s3[0][3] == NULL
+       && s3[0][4] == NULL
+       && get_etiquette (s3[0][5]) == EPSILON
 	 
-	 && get_lettre (s3[1][0]) == 'a'
-	 && s3[1][1] == NULL
-	 && s3[1][2] == NULL
-	 && s3[1][3] == NULL
-	 && s3[1][4] == NULL
-	 && s3[1][5] == NULL
+       && get_lettre (s3[1][0]) == 'a'
+       && s3[1][1] == NULL
+       && s3[1][2] == NULL
+       && s3[1][3] == NULL
+       && s3[1][4] == NULL
+       && s3[1][5] == NULL
 	 
-	 && get_lettre (s3[2][0]) == 'b'
-	 && get_lettre (s3[2][1]) == 'a'
-	 && get_lettre (s3[2][2]) == 'a'
-	 && s3[2][3] == NULL
-	 && s3[2][4] == NULL
-	 && s3[2][5] == NULL
+       && get_lettre (s3[2][0]) == 'b'
+       && get_lettre (s3[2][1]) == 'a'
+       && get_lettre (s3[2][2]) == 'a'
+       && s3[2][3] == NULL
+       && s3[2][4] == NULL
+       && s3[2][5] == NULL
 	 
-	 && s3[3][0] == NULL
-	 && s3[3][1] == NULL
-	 && get_lettre (s3[3][2]) == 'b'
-	 && get_etiquette (s3[3][3]) == UNION
-	 && ((get_lettre (fils_gauche (s3[3][3])) == 'a'
-	  && get_lettre (fils_droit (s3[3][3])) == 'b')
-	 || (get_lettre (fils_droit (s3[3][3])) == 'a'
-	     && get_lettre (fils_gauche (s3[3][3])) == 'b' ))
-	 && s3[3][4] == NULL
-	 && s3[3][5] == NULL
+       && s3[3][0] == NULL
+       && s3[3][1] == NULL
+       && get_lettre (s3[3][2]) == 'b'
+       && get_etiquette (s3[3][3]) == UNION
+       && ((get_lettre (fils_gauche (s3[3][3])) == 'a'
+	    && get_lettre (fils_droit (s3[3][3])) == 'b')
+	   || (get_lettre (fils_droit (s3[3][3])) == 'a'
+	       && get_lettre (fils_gauche (s3[3][3])) == 'b' ))
+       && s3[3][4] == NULL
+       && s3[3][5] == NULL
 
-	 && s3[4][0] == NULL
-	 && get_lettre (s3[4][1]) == 'b'
-	 && s3[4][2] == NULL
-	 && s3[4][3] == NULL
-	 && ((get_lettre (fils_gauche (s3[4][4])) == 'a'
-	  && get_lettre (fils_droit (s3[4][4])) == 'b')
-	 || (get_lettre (fils_droit (s3[4][4])) == 'a'
-	     && get_lettre (fils_gauche (s3[4][4])) == 'b' ))
-	 && s3[4][5] == NULL
-	 , resultat);
+       && s3[4][0] == NULL
+       && get_lettre (s3[4][1]) == 'b'
+       && s3[4][2] == NULL
+       && s3[4][3] == NULL
+       && ((get_lettre (fils_gauche (s3[4][4])) == 'a'
+	    && get_lettre (fils_droit (s3[4][4])) == 'b')
+	   || (get_lettre (fils_droit (s3[4][4])) == 'a'
+	       && get_lettre (fils_gauche (s3[4][4])) == 'b' ))
+       && s3[4][5] == NULL
+       , resultat);
 
-
-
-   
-  Rationnel * ras1 = Arden (a1);
-  print_rationnel(ras1);
-  Rationnel * ras3 = Arden (a3);
-  print_rationnel(ras3);
   /*
-  fprintf(stderr,"\ns2 \n\n");
-  print_automate(creer_automate_minimal(a2));
-  print_systeme (s2,taille_ensemble(get_etats (creer_automate_minimal(a2))));
-  fprintf(stderr,"\n\n\n\n\n");
-  Rationnel * ras2 = Arden (a2);
-  print_rationnel (ras2);
-  fprintf(stderr,"\n\n\n\n\n");
+  Rationnel * ras1 = Arden (a1);
+  printf("\n\n rationnel final :\n");
+  print_rationnel(ras1);
   
-  fprintf(stderr,"\ns3 \n\n");
-  print_automate(a3);
-  fprintf(stderr,"\n\n");
-  print_automate(creer_automate_minimal(a3));
-  fprintf(stderr,"\n\n");
-  print_systeme (s3,taille_ensemble(get_etats (creer_automate_minimal(a3))));
-  fprintf(stderr,"\n\n\n\n\n");
   Rationnel * ras3 = Arden (a3);
-  print_rationnel (ras3);
+  printf("\n\n rationnel final :\n");
+  print_rationnel(ras3);
+  printf("\n\n");
   */
+
+  Rationnel * r4 = expression_to_rationnel("(a+b)*");
+  Automate * a4 = Glushkov(r4);
+  Rationnel * ras4 = Arden (creer_automate_minimal(a4));
+  printf("\n\n rationnel final :\n");
+  print_rationnel(ras4);
+  printf("\n\n");
+  
+  
   //nettoyage final
 
-  destroy_rationnel(ras1);
+  //destroy_rationnel(ras1);
   //destroy_rationnel(ras2);
   //destroy_rationnel(ras3);
   
