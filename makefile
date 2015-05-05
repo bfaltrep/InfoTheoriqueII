@@ -1,7 +1,7 @@
 TESTS_SOURCES=$(wildcard tests/test_*.c)
 TESTS=$(TESTS_SOURCES:.c=)
 
-CPPFLAGS=-g -ggdb -O0 -std=c11 -Wall -Werror -I.
+CPPFLAGS=-g -ggdb -O0 -std=c11 -Wall -I.
 CFLAGS=-fPIC -ggdb -I. 
 LDFLAGS= -lm
 
@@ -48,6 +48,7 @@ libautomate.a: libautomate.a(automate.o table.o ensemble.o avl.o fifo.o outils.o
 
 clean:
 	-rm -f scan.c scan.h parse.c parse.h
+	-rm *~
 	-rm -rf *.o
 	-rm -rf *.a
 	-rm -rf *.mk
