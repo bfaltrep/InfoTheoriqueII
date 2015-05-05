@@ -737,32 +737,36 @@ Systeme systeme(Automate *automate)
 
 Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int n)
 {
-  /*
+  
   //A RETIRER, QUE PR LES TESTS
-  printf("\narden V1 %d: \n",numero_variable);
+  /*printf("\narden V1 %d: \n",numero_variable);
   for (int i=0; i<= n; i++){
     print_rationnel(ligne[i]);
     printf("  -  ");
-  }
+    }*/
+  
   printf("\n");
-  */
+  
   
   Rationnel* tmp = Star(ligne[numero_variable]);
   
   for (int i = 0; i <= n; i++){
     //on distribue le U* de U*.V pour conserver la forme de la ligne (union des cellules)
     if (i != numero_variable){
-      if(ligne[i] != NULL){
-        ligne[i] = Concat(ligne[i],tmp);
-      }
+      if(ligne[i] == EPSILON)
+	ligne[i] = Concat(tmp,EPSILON); 
+      if(ligne[i] != NULL)
+        ligne[i] = Concat(tmp,ligne[i]);
+      else if (ligne[i] == NULL)
+	ligne[i] = NULL;
     }
     //on a déja traité la valeur de ligne[numero_variable], on peut donc la supprimer.
     else
       ligne[i] = NULL;
   }
-  /*
+   
   //A RETIRER, QUE PR LES TESTS
-  printf("\narden V2: \n");
+  /*printf("\narden V2: \n");
   for (int i=0; i<= n; i++){
     print_rationnel(ligne[i]);
     printf("  -  ");
