@@ -206,7 +206,7 @@ int test_bere (void){
   //test Systeme
 
   printf("\n --- test Systeme --- \n\n");
-  
+  /*
   Systeme s1 = systeme(a1);
   TEST(
 	 1
@@ -263,8 +263,8 @@ int test_bere (void){
 	       && get_lettre (fils_gauche (s3[4][4])) == 'b' ))
        && s3[4][5] == NULL
        , resultat);
-
-  
+  */
+  /*
   Rationnel * ras1 = Arden (a1);
   printf("\n\n rationnel final :\n");
   print_rationnel(ras1);
@@ -273,15 +273,15 @@ int test_bere (void){
   printf("\n\n rationnel final :\n");
   print_rationnel(ras3);
   printf("\n\n");
-  
-  
+  */
+  /*
   Rationnel * r4 = expression_to_rationnel("(a+b)*");
   Automate * a4 = Glushkov(r4);
   Rationnel * ras4 = Arden (a4);
   printf("\n rationnel final :\n");
   print_rationnel(ras4);
   printf("\n\n");
-  
+  */
   /*
   Automate * a5 = creer_automate();
   ajouter_transition (a5,0,'a',0);
@@ -291,14 +291,29 @@ int test_bere (void){
   ajouter_transition (a5,2,'a',1);
   ajouter_transition (a5,2,'b',2);
   ajouter_etat_initial(a5,0);
-  ajouter_etat_final (a5,0);*/
+  ajouter_etat_final (a5,0);
   
-  /*
-  Rationnel * ras4 = Arden (a4);
+  
+  Rationnel * ras5 = Arden (a5);
   printf("\n rationnel final :\n");
-  print_rationnel(ras4);
+  print_rationnel(ras5);
   printf("\n\n");
   */
+  
+  Automate * a6 = creer_automate();
+  ajouter_transition (a6,0,'a',0);
+  ajouter_transition (a6,0,'a',1);
+  ajouter_transition (a6,0,'b',2);
+  ajouter_transition (a6,2,'a',2);
+  ajouter_etat_final (a6,1);
+  ajouter_etat_final (a6,2);
+  ajouter_etat_initial(a6,0);
+
+  Rationnel * ras6 = Arden (a6);
+  printf("\n rationnel final :\n");
+  print_rationnel(ras6);
+  printf("\n\n");
+  
   
   //nettoyage final
 

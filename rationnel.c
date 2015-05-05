@@ -690,7 +690,6 @@ void print_systeme(Systeme systeme, int n)
 // ---------- fonctions locales pour systeme ----------
 
 Systeme creer_systeme(Automate * automate, int size){
-  
   Systeme s = malloc(sizeof(Rationnel **) * size);
   
   for(int i = 0 ; i < size ; i++){
@@ -700,29 +699,44 @@ Systeme creer_systeme(Automate * automate, int size){
   return s;
 }
 
-void ajoute_dans_systeme (int origine, char lettre, int fin, void *data){
- 
-  //cas ou il y a plusieurs lettres allant de origine a fin
-  if(((Systeme)data)[fin][origine] != NULL){
-    ((Systeme)data)[fin][origine] = Union(((Systeme)data)[fin][origine],Lettre(lettre));
-  }
-  //cas simple
-  else{
-    ((Systeme)data)[fin][origine] = Lettre(lettre);
-    }
+void ajoute_dans_systeme_sortante (int origine, char lettre, int fin, void *data){
+  //la fonction d'union gère le cas ou un des deux paramètre est NULL
+  ((Systeme)data)[origine][fin] = Union(((Systeme)data)[origine][fin],Lettre(lettre));
+}
+
+void ajoute_dans_systeme_entrante (int origine, char lettre, int fin, void *data){
+  ((Systeme)data)[fin][origine] = Union(((Systeme)data)[fin][origine],Lettre(lettre));
 }
 
 // ------------------------------
 
-Systeme systeme(Automate *automate)
+//Systeme des transition sortante
+Systeme systeme(Automate *minimal)
 {
-  //Systeme des transition entrantes
+  int size = taille_ensemble(get_etats(minimal));
+  Systeme s = creer_systeme(minimal, size);
+  
+  //remplissage de la matrice en fonction des transition : les n premières colonnes.
+  pour_toute_transition (minimal, ajoute_dans_systeme_sortante, (void *)s);
+  
+  //remplissage de la dernière colonne : ε ou NULL, à la création du systeme.
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_finaux(minimal));
+  while (!iterateur_ensemble_est_vide(ens_i)){
+    s[((int)get_element(ens_i))][size] = Epsilon();
+    ens_i = iterateur_suivant_ensemble(ens_i);
+  }
+  return s;
+}
+
+ //Systeme des transition entrantes
+Systeme systeme2(Automate *automate)
+{
   Automate * minimal = creer_automate_minimal(automate);
   int size = taille_ensemble(get_etats(minimal));
   Systeme s = creer_systeme(minimal, size);
   
   //remplissage de la matrice en fonction des transition : les n premières colonnes.
-  pour_toute_transition (minimal, ajoute_dans_systeme, (void *)s);
+  pour_toute_transition (minimal, ajoute_dans_systeme_entrante, (void *)s);
   
   //remplissage de la dernière colonne : ε ou NULL, à la création du systeme.
   Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(minimal));
@@ -794,13 +808,7 @@ Systeme resoudre_systeme(Systeme systeme, int n)
   for(int i = 0; i < n ; i++){
     //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des variables d'états
     for(int j = 0 ; j < n ; j++){
-      //TMP PR TESTS, A SUPPRIMER
-      if(systeme[i][j] != NULL && i == j && contient_mot_vide(systeme[i][j])){
-        printf("POWPOWPOOOOO\n");
-      }
-
-
-      
+    
       //Si systeme[i][j] est null, aucune raison d'appliquer un changement
       //Et si U contient epsilon, on ne peut appliquer arden ou résoudre => négation.
       if(systeme[i][j] != NULL && ((i == j && !contient_mot_vide(systeme[i][j])) || i != j)){
@@ -822,15 +830,16 @@ Systeme resoudre_systeme(Systeme systeme, int n)
   return systeme;
 }
 
-Rationnel *Arden(Automate *automate)
+Rationnel *Arden(Automate *minimal)
 {
   //on minimise pour s'assurer que le systeme sera le plus simple possible
-  Automate * minimal = creer_automate_minimal(automate);
+  //Automate * minimal = creer_automate_minimal(automate);
   int size = taille_ensemble(get_etats(minimal));
   
   //on créer le système puis on le résout
   Systeme s = systeme(minimal);
 
+  print_systeme(s,size);
   //TMP
   //printf("\n\n V1 : \n");
   //print_systeme(s,size);
