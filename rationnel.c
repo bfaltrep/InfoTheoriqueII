@@ -751,13 +751,10 @@ Systeme systeme2(Automate *automate)
 
 Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int n)
 {
-  
-  //A RETIRER, QUE PR LES TESTS
-  /*printf("\narden V1 %d: \n",numero_variable);
-  for (int i=0; i<= n; i++){
-    print_rationnel(ligne[i]);
-    printf("  -  ");
-    }*/
+
+
+  if( ligne[numero_variable] == NULL || ligne[numero_variable] == EPSILON)
+    return ligne;
   
   printf("\n");
   
@@ -778,15 +775,6 @@ Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int 
     else
       ligne[i] = NULL;
   }
-   
-  //A RETIRER, QUE PR LES TESTS
-  /*printf("\narden V2: \n");
-  for (int i=0; i<= n; i++){
-    print_rationnel(ligne[i]);
-    printf("  -  ");
-  }
-  printf("\n");
-  */
   return ligne;
 			 
 }
@@ -796,38 +784,28 @@ Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationne
   int i = 0;
   for(;i < n ;i++){
     if(valeur_variable[i] != NULL){
-      ligne[i] = Concat(ligne[numero_variable],valeur_variable[i]);
+      ligne[i] = Union(ligne[i],Concat(ligne[numero_variable],valeur_variable[i]));
     }
   }
-  if(valeur_variable[n] != NULL){
-    ligne[n] = Union(ligne[numero_variable],valeur_variable[i]);
-    }
-  
+  ligne[n] = Union(Concat(ligne[numero_variable],valeur_variable[n]),ligne[n]);
+  ligne[numero_variable] = NULL;
   return ligne;
 }
 
 Systeme resoudre_systeme(Systeme systeme, int n)
 {
-
+  for(int i=0; i<n;i ++){
+    systeme[i] = resoudre_variable_arden(systeme[i],i,n);
+  }
+  
   for(int i = 0; i < n ; i++){
     //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des variables d'états
     for(int j = 0 ; j < n ; j++){
     
       //Si systeme[i][j] est null, aucune raison d'appliquer un changement
       //Et si U contient epsilon, on ne peut appliquer arden ou résoudre => négation.
-      if(systeme[i][j] != NULL && ((i == j && !contient_mot_vide(systeme[i][j])) || i != j)){
-	//
-	printf("\ni %d j %d\n",i,j);
-	printf("\n\n V2 : \n");
-	print_systeme(systeme,n);
-	printf("\n");
-	//
-	
-	if(i == j){
-	  systeme[i] = resoudre_variable_arden(systeme[i],i,n);
-	}else{
-	  systeme[i] = substituer_variable(systeme[i], j, systeme[j], n);
-	}
+      if(systeme[i][j] != NULL && ((i == j && !contient_mot_vide(systeme[i][j])) || i != j)){	
+	systeme[i] = substituer_variable(systeme[i], j, systeme[j], n);
       }
     }
   }
@@ -843,24 +821,20 @@ Rationnel *Arden(Automate *minimal)
   //on créer le système puis on le résout
   Systeme s = systeme(minimal);
 
-  print_systeme(s,size);
-  //TMP
-  //printf("\n\n V1 : \n");
-  //print_systeme(s,size);
-  
+  print_systeme(s,size);//TMP
+
   s = resoudre_systeme(s,size);
 
   //TMP
-  /*
   printf("\n\n V2 : \n");
   print_systeme(s,size);
   printf("\n");
-  */
+  //TMP
   
   Rationnel * res =NULL;
   
-  //on peut alors faire l'union des finaux
-  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_finaux(minimal));   
+  //on peut alors faire l'union des initiaux
+  Ensemble_iterateur ens_i = premier_iterateur_ensemble(get_initiaux(minimal));   
   while (!iterateur_ensemble_est_vide(ens_i)){
     if (s[((int)get_element(ens_i))][size] != NULL){
       res = Union(res,s[((int)get_element(ens_i))][size]);

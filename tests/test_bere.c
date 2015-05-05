@@ -282,7 +282,7 @@ int test_bere (void){
   print_rationnel(ras4);
   printf("\n\n");
   */
-  /*
+  
   Automate * a5 = creer_automate();
   ajouter_transition (a5,0,'a',0);
   ajouter_transition (a5,0,'b',1);
@@ -298,7 +298,7 @@ int test_bere (void){
   printf("\n rationnel final :\n");
   print_rationnel(ras5);
   printf("\n\n");
-  */
+  
   
   Automate * a6 = creer_automate();
   ajouter_transition (a6,0,'a',0);
@@ -309,12 +309,47 @@ int test_bere (void){
   ajouter_etat_final (a6,2);
   ajouter_etat_initial(a6,0);
 
+
+  
   Rationnel * ras6 = Arden (a6);
   printf("\n rationnel final :\n");
   print_rationnel(ras6);
   printf("\n\n");
   
+  printf("DANS TA FACE !!!! --------------------------------------- \n");
   
+  Systeme s = systeme(a6);
+  for (int j=0 ;j<3; j++){
+      for (int i=0; i<= 3; i++){
+	print_rationnel(s[j][i]);
+	printf("  -  ");
+      }
+      printf("\n");
+  }
+  /**
+  Rationnel ** tmp = resoudre_variable_arden(s[0],0,3);
+  Rationnel ** tmp2 = resoudre_variable_arden(s[1],1,3);  
+  Rationnel ** tmp3 = resoudre_variable_arden(s[2],2,3);
+  **/
+  s=resoudre_systeme(s,3);
+  printf("\nresoudre variable 1: \n");
+  for (int i=0; i<= 3; i++){
+    print_rationnel(s[0][i]);
+    printf("  -  ");
+  }
+  printf("\nresoudre variable 2: \n");
+  for (int i=0; i<= 3; i++){
+    print_rationnel(s[1][i]);
+    printf("  -  ");
+  }
+  printf("\nresoudre variable 3: \n");
+  for (int i=0; i<= 3; i++){
+    print_rationnel(s[2][i]);
+    printf("  -  ");
+  }
+  printf("\n");
+  
+
   //nettoyage final
 
   //destroy_rationnel(ras1);
