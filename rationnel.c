@@ -614,52 +614,17 @@ Automate *Glushkov(Rationnel *rat){
       }
     return a;
 }
-    
-/*
-  retourne un nouvel automate qui est le complémentaire de l'automate en paramètre.
-*/
-Automate * complementaire (Automate * automate){
-  Automate * comp = copier_automate (automate);
-
-  Ensemble * nouveau_final = copier_ensemble(get_etats(comp));
-  retirer_elements(nouveau_final,get_finaux(automate));
-
-  comp->finaux = nouveau_final;
-  return comp;
-}
 
 bool meme_langage (const char *expr1, const char* expr2)
 {
-  //pour chaque expression, on la change en rationnel, qui est alors tranformée en automate que l'on minimise
+  //pour chaque expression, on la change en rationnel, qui est alors tranformée en automate 
   Rationnel * r1 = expression_to_rationnel(expr1);
   Rationnel * r2 = expression_to_rationnel(expr2);
   
   Automate * a1= Glushkov(r1);
   Automate * a2= Glushkov(r2);
 
-  //si l'ensemble des alphabets est différent, il ne peut s'agir du meme langage
-  if (comparer_ensemble(get_alphabet (a1),get_alphabet (a2)) != 0){
-    return false;
-  }
-
-  //seul l'automate minimal est canonique, nous minimisons donc nos automates.
-  Automate * am1 = creer_automate_minimal(a1);
-  Automate * am2 = creer_automate_minimal(a2);
-
-  //on test si inter(complementaire(am1),am2) = ensemble vide soit :  am2 inclus dans am1
-  Automate * intersection = creer_intersection_des_automates (complementaire(am1),am2);  
-  if(taille_ensemble(creer_intersection_ensemble(etats_accessibles(intersection,0),get_finaux(intersection))) != 0){
-    return false;
-  }
-  
-  //on test si inter(complementaire(am2),am1) = ensemble vide soit : am1 inclus dans am2
-  intersection = creer_intersection_des_automates (complementaire(am2),am1);
-  if(taille_ensemble(creer_intersection_ensemble(etats_accessibles(intersection,0),get_finaux(intersection))) != 0){
-    return false;
-  }
-
-  //si la double inclusion est correcte, alors il s'agit du meme langage
-  return true;
+  return automates_reconnaissent_le_meme_language(a1, a2);
 }
 
 

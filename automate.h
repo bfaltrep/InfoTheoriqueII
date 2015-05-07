@@ -24,6 +24,7 @@
 #define __AUTOMATE_H__
 
 #include "ensemble.h"
+#include <stdbool.h>
 
 /**
  * @brief Le type d'un automate.
@@ -399,4 +400,15 @@ Automate * creer_automate_minimal( const Automate* automate );
  */
 int nombre_de_transitions( const Automate* automate );
 
+
+
+
+bool automates_reconnaissent_le_meme_language(Automate * a1, Automate * a2);
+
+Automate * creer_automate_complement (Automate * automate);
+
+
+
+
 #endif
+

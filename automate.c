@@ -24,6 +24,7 @@
 #include "outils.h"
 #include "fifo.h"
 
+
 #include <search.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -639,7 +640,7 @@ Automate *automate_accessible( const Automate * automate ){
   return res;
 }
 
-//modifications
+//---------------  modifications  ------------
 
 /*
   Ajoute une transition à l'automate transmis dans data. 
@@ -666,14 +667,22 @@ void copier_etat_final(const intptr_t element, void * data){
   ajouter_etat_final( ((Automate *) data), element);
 }
 
+void copier_lettre( const intptr_t element, void* data )
+{
+  ajouter_lettre ((Automate *)data, element);
+}
+
 /*
-  retourne l'automate miroir déterminisé.
+  retourne l'automate miroir.
 */
 Automate *miroir( const Automate * automate){
   assert(automate);
   
+  //creer le nouvel automate
   Automate * a = creer_automate();
+  pour_tout_element(get_alphabet (automate), copier_lettre, ((Automate*) a));
   pour_toute_transition( automate, inverser_origine_destination, ((Automate *) a));
+  
   //inverse initiaux et finaux.
   pour_tout_element( automate->finaux, copier_etat_initial, ((Automate *) a));
   pour_tout_element( automate->initiaux, copier_etat_final, ((Automate *) a));
@@ -862,8 +871,12 @@ Automate * creer_automate_deterministe( const Automate* automate ){
 
 Automate * creer_automate_minimal( const Automate* automate ){
   assert(automate);
-  
-  //on calcul le miroir de l'automate passé en paramètre et on le déterminise
+  if(taille_ensemble(get_etats(automate)) == 0){
+    Automate * egal = creer_automate();
+    pour_tout_element(get_alphabet (automate), copier_lettre, ((Automate*) egal));
+    return egal;
+  }
+  //on calcul le miroir de l'automate passé en paramètre déterminisé. Puis on déterminise le miroir
   Automate * aMiroir = miroir(automate);
   Automate * aDeterministe = creer_automate_deterministe (aMiroir);
   liberer_automate (aMiroir);
@@ -878,3 +891,68 @@ Automate * creer_automate_minimal( const Automate* automate ){
   return aDeterministe;
 }
 
+bool automates_reconnaissent_le_meme_language(Automate * a1, Automate * a2){
+  assert(a1 || a2);
+  //si l'ensemble des alphabets est différent, il ne peut s'agir du meme langage
+  if (comparer_ensemble(get_alphabet (a1),get_alphabet (a2)) != 0){    
+    return false;
+  }
+
+  //seul l'automate minimal est canonique, nous minimisons donc nos automates.
+  Automate * am1 = creer_automate_minimal(a1);
+  Automate * am2 = creer_automate_minimal(a2);
+
+  //on test si inter(complementaire(am1),am2) = ensemble vide soit : am2 inclus dans am1. Sinon, ce n'est pas le même langage.
+  Automate * intersection = creer_intersection_des_automates (creer_automate_complement(am1),am2);
+  if(taille_ensemble(creer_intersection_ensemble(accessibles(intersection),get_finaux(intersection))) != 0){
+    
+    liberer_automate(am1);
+    liberer_automate(am2);
+    
+    return false;
+  }
+
+  //on test si inter(complementaire(am2),am1) = ensemble vide soit : am1 inclus dans am2. Sinon, ce n'est pas le même langage.
+  intersection = creer_intersection_des_automates (creer_automate_complement(am2),am1); 
+  if(taille_ensemble(creer_intersection_ensemble(accessibles(intersection),get_finaux(intersection))) != 0){
+    
+    liberer_automate(am1);
+    liberer_automate(am2);
+   
+    return false;
+  }
+
+  liberer_automate(am1);
+  liberer_automate(am2);
+  //si la double inclusion est correcte, alors il s'agit du meme langage
+  return true;
+
+}
+
+void copier_transition(int origine, char lettre, int fin, void *data)
+{
+  ajouter_transition ((Automate *)data, origine, lettre, fin);
+}
+
+/*
+  retourne un nouvel automate qui est le complémentaire de l'automate en paramètre.
+*/
+Automate * creer_automate_complement (Automate * automate){
+  assert(automate);
+  
+  Automate * deterministe = creer_automate_deterministe(automate);
+  
+  Automate * comp = creer_automate();
+  
+  //creer un ensemble contenant les états non finaux de automate
+  Ensemble * nouveau_final = copier_ensemble(get_etats(deterministe));
+  retirer_elements(nouveau_final,get_finaux(deterministe));
+  
+  //ajoute ces finaux dans comp. Puis les transitions et enfin les initiaux de l'automate.
+  pour_tout_element(nouveau_final, copier_etat_final, ((Automate*) comp));
+  pour_tout_element(get_alphabet (deterministe), copier_lettre, ((Automate*) comp));
+  pour_toute_transition(deterministe, copier_transition, ((Automate*) comp));
+  pour_tout_element(deterministe->initiaux, copier_etat_initial, ((Automate*) comp));
+
+  return comp;
+}
