@@ -98,7 +98,7 @@ void destroy_systeme(Systeme s, int size){
 
 int test_bere (void){
   int resultat = 1;
-  
+  /*
   Rationnel * r1 = expression_to_rationnel("(a+b)*.a");
   Rationnel * r2 = expression_to_rationnel("a.(a+b)*");
   
@@ -147,7 +147,7 @@ int test_bere (void){
   
   //test Systeme
 
-  printf("\n --- test Systeme --- \n\n");
+  printf("\n --- test Systeme --- \n\n");*/
   /*
   Systeme s1 = systeme(a1);
   TEST(
@@ -240,8 +240,11 @@ int test_bere (void){
   printf("\n rationnel final :\n");
   print_rationnel(ras5);
   printf("\n\n");
+  Automate * a52 = Glushkov(ras5);
+  print_automate(a52);
   
-  
+  printf("\n%s\n",automates_reconnaissent_le_meme_language(a5, a52)?"oui":"non");
+  /*
   Automate * a6 = creer_automate();
   ajouter_transition (a6,0,'a',0);
   ajouter_transition (a6,0,'a',1);
@@ -266,49 +269,8 @@ int test_bere (void){
 	printf("  -  ");
       }
       printf("\n");
-  }
-  /**
-  Rationnel ** tmp = resoudre_variable_arden(s[0],0,3);
-  Rationnel ** tmp2 = resoudre_variable_arden(s[1],1,3);  
-  Rationnel ** tmp3 = resoudre_variable_arden(s[2],2,3);
-  **/
-  s=resoudre_systeme(s,3);
-  printf("\nresoudre variable 1: \n");
-  for (int i=0; i<= 3; i++){
-    print_rationnel(s[0][i]);
-    printf("  -  ");
-  }
-  printf("\nresoudre variable 2: \n");
-  for (int i=0; i<= 3; i++){
-    print_rationnel(s[1][i]);
-    printf("  -  ");
-  }
-  printf("\nresoudre variable 3: \n");
-  for (int i=0; i<= 3; i++){
-    print_rationnel(s[2][i]);
-    printf("  -  ");
-  }
-  printf("\n");
-  
-
-  //nettoyage final
-
-  //destroy_rationnel(ras1);
-  //destroy_rationnel(ras2);
-  //destroy_rationnel(ras3);
-  
-  /*
-  destroy_systeme(s1,taille_ensemble(get_etats (creer_automate_minimal(a1))));
-  destroy_systeme(s2,taille_ensemble(get_etats (creer_automate_minimal(a2))));
-  destroy_systeme(s2,taille_ensemble(get_etats (creer_automate_minimal(a3))));
-  */
-  liberer_automate (a1);
-  liberer_automate (a2);
-  liberer_automate (a3);
-  
-  destroy_rationnel(r1);
-  destroy_rationnel(r2);
-  
+      }
+*/
   return resultat;
 
 }

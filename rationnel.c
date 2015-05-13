@@ -345,8 +345,7 @@ int rationnel_to_dot_aux(Rationnel *rat, FILE *output, int pere, int noeud_coura
 */
 int parcours_numeroter_rationnel(Rationnel *rat, int nb){
   if(rat == NULL){
-    printf("error");
-    fflush(stdout);
+    fprintf(stderr,"\nerreur durant la numerotation.\n");
     return 0;
   }
   
@@ -586,6 +585,7 @@ Automate *Glushkov(Rationnel *rat){
     
     //on rajoute les états premiers 
     Ensemble* prems = premier(rat);
+    
     for (it = premier_iterateur_ensemble(prems) ; !iterateur_est_vide(it) ; it = iterateur_suivant_ensemble(it)) {
       ajouter_etat(a,get_element(it));
       c = get_lettre_in_position(rat, get_element(it));
@@ -596,7 +596,7 @@ Automate *Glushkov(Rationnel *rat){
     
     for (int i=1; i<= nb_positions; i++){
       Ensemble* suivnt=suivant (rat,i);
-        
+      
       for (it = premier_iterateur_ensemble(suivnt);!iterateur_est_vide(it); it= iterateur_suivant_ensemble(it)) {
 	ajouter_etat(a,i);
 	c = get_lettre_in_position(rat,get_element(it));
@@ -739,50 +739,47 @@ Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int 
   return ligne;
 			 
 }
-  
+
 Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationnel **valeur_variable, int n)
 {
   int i = 0;
+  //parcours de valeur_variable
   for(;i < n ;i++){
-    if(valeur_variable[i] != NULL && ligne[i] != NULL){
+    if(valeur_variable[i] != NULL){
       ligne[i] = Union(ligne[i],Concat(ligne[numero_variable],valeur_variable[i]));
     }
   }
-  ligne[n] = Union(Concat(ligne[numero_variable],valeur_variable[n]),ligne[n]);
-  
-  printf("\n %d \n",numero_variable);//TEMP
-  print_rationnel(Union(Concat(ligne[numero_variable],valeur_variable[n]),ligne[n]));
-  printf("\n");
-  //TEMP
-  
-  ligne[numero_variable] = NULL;
+  //on ajoute la valeur dans la derniere case de la ligne
+  ligne[n] = Union(Concat(ligne[numero_variable],valeur_variable[i]),ligne[n]);
 
-  print_ligne(ligne,n);//TEMP
-  printf("\n");//TEMP
+  //elle a été reportée sur les autres cases, on peut donc la vider.
+  ligne[numero_variable] = NULL;
   
   return ligne;
 }
 
+/*
+  il  a un problème de calcul que nous ne parvenons pas a résoudre lorsque la substitution replace des éléments dans des cases précédemment vidées.
+*/
 Systeme resoudre_systeme(Systeme systeme, int n)
 {
+  //  while(!est_sans_variables(systeme,n)){
   for(int i=0; i<n;i ++){
     systeme[i] = resoudre_variable_arden(systeme[i],i,n);
   }
 
-  //a ce stade, ok ! TEMP
-  printf("apres arden \n");
-  print_systeme(systeme,n);//TMP
-  printf("\n");
-
-  
- for(int i = 0; i < n ; i++){
+  for(int i = 0; i < n ; i++){
     //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des variables d'états
     for(int j = 0 ; j < n ; j++){
     
       //Si systeme[i][j] est null, aucune raison d'appliquer un changement
       //Et si U contient epsilon, on ne peut appliquer arden ou résoudre => négation.
-      if(systeme[i][j] != NULL && ((i == j && !contient_mot_vide(systeme[i][j])) || i != j)){	
+      if(systeme[i][j] != NULL && ((i == j && !contient_mot_vide(systeme[i][j])) || i != j)){
 	systeme[i] = substituer_variable(systeme[i], j, systeme[j], n);
+	if(systeme[i][i] != NULL){
+	  systeme[i] = resoudre_variable_arden(systeme[i],i,n);
+	}
+	
       }
     }
   }
@@ -797,18 +794,8 @@ Rationnel *Arden(Automate *minimal)
   
   //on créer le système puis on le résout
   Systeme s = systeme(minimal);
-  
-  printf("version initiale \n");
-  print_systeme(s,size);//TMP
-  printf("\n");
  
   s = resoudre_systeme(s,size);
-
-  //TMP
-  printf("\n\n V2 : \n");
-  print_systeme(s,size);
-  printf("\n");
-  //TMP
   
   Rationnel * res =NULL;
   
