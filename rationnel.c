@@ -717,13 +717,9 @@ Systeme systeme2(Automate *automate)
 Rationnel **resoudre_variable_arden(Rationnel **ligne, int numero_variable, int n)
 {
 
-
   if( ligne[numero_variable] == NULL || ligne[numero_variable] == EPSILON)
     return ligne;
-  
-  printf("\n");
-  
-  
+
   Rationnel* tmp = Star(ligne[numero_variable]);
   
   for (int i = 0; i <= n; i++){
@@ -748,12 +744,22 @@ Rationnel **substituer_variable(Rationnel **ligne, int numero_variable, Rationne
 {
   int i = 0;
   for(;i < n ;i++){
-    if(valeur_variable[i] != NULL){
+    if(valeur_variable[i] != NULL && ligne[i] != NULL){
       ligne[i] = Union(ligne[i],Concat(ligne[numero_variable],valeur_variable[i]));
     }
   }
   ligne[n] = Union(Concat(ligne[numero_variable],valeur_variable[n]),ligne[n]);
+  
+  printf("\n %d \n",numero_variable);//TEMP
+  print_rationnel(Union(Concat(ligne[numero_variable],valeur_variable[n]),ligne[n]));
+  printf("\n");
+  //TEMP
+  
   ligne[numero_variable] = NULL;
+
+  print_ligne(ligne,n);//TEMP
+  printf("\n");//TEMP
+  
   return ligne;
 }
 
@@ -762,8 +768,14 @@ Systeme resoudre_systeme(Systeme systeme, int n)
   for(int i=0; i<n;i ++){
     systeme[i] = resoudre_variable_arden(systeme[i],i,n);
   }
+
+  //a ce stade, ok ! TEMP
+  printf("apres arden \n");
+  print_systeme(systeme,n);//TMP
+  printf("\n");
+
   
-  for(int i = 0; i < n ; i++){
+ for(int i = 0; i < n ; i++){
     //on n'a pas a parcourir n puisqu'il s'agit du rationnel non lié à un état et que le but ici est de se débarasser des variables d'états
     for(int j = 0 ; j < n ; j++){
     
@@ -785,9 +797,11 @@ Rationnel *Arden(Automate *minimal)
   
   //on créer le système puis on le résout
   Systeme s = systeme(minimal);
-
+  
+  printf("version initiale \n");
   print_systeme(s,size);//TMP
-
+  printf("\n");
+ 
   s = resoudre_systeme(s,size);
 
   //TMP

@@ -5,17 +5,7 @@
 #include <parse.h>
 #include <scan.h>
 #include <assert.h>
-
-Automate * complementaire2 (Automate * automate){
-  Automate * comp = copier_automate (automate);
-
-  Ensemble * nouveau_final = copier_ensemble(get_etats(comp));
-  retirer_elements(nouveau_final,get_finaux(automate));
-
-  comp->finaux = nouveau_final;
-  return comp;
-}
-
+/*
 bool meme_langage_rationnel (Rationnel * rat1, Rationnel * rat2) {
   Automate * aut1 = Glushkov(rat1); Automate * aut2 = Glushkov(rat2);
 
@@ -86,55 +76,7 @@ Rationnel *Arden2(Automate *automate) {
 	res = sys[i][nb_etat]; }
       else{ res = Union(res, sys[i][nb_etat]); } } }
   return res; }
-
-
-
-void print_rationnel2(Rationnel* rat)
-{
-   if (rat == NULL)
-   {
-     printf("∅");
-      return;
-   }
-   switch(get_etiquette(rat))
-   {
-      case EPSILON:
-         printf("ε");         
-         break;
-         
-      case LETTRE:
-         printf("%c", get_lettre(rat));
-         break;
-
-      case UNION:
-         printf("(");
-         print_rationnel(fils_gauche(rat));
-         printf(" + ");
-         print_rationnel(fils_droit(rat));
-         printf(")");         
-         break;
-
-      case CONCAT:
-         printf("[");
-         print_rationnel(fils_gauche(rat));
-         printf(" . ");
-         print_rationnel(fils_droit(rat));
-         printf("]");         
-         break;
-
-      case STAR:
-         printf("{");
-         print_rationnel(fils(rat));
-         printf("}*");         
-         break;
-
-      default:
-         assert(false);
-         break;
-   }
-   printf("\nmin : %d et max : %d\n",rat->position_min,rat->position_max);
-}
-
+*/
 void destroy_rationnel(Rationnel * rat){
   if(rat == NULL){
     return;
@@ -316,7 +258,6 @@ int test_bere (void){
   print_rationnel(ras6);
   printf("\n\n");
   
-  printf("DANS TA FACE !!!! --------------------------------------- \n");
   
   Systeme s = systeme(a6);
   for (int j=0 ;j<3; j++){
